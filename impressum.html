@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Himbeerkuchen - Impressum</title>
+    <style>
+        body {
+            font-family: Verdana, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212; /* Dunkler Hintergrund für Dark Mode */
+            color: #e0e0e0; /* Helle Textfarbe für bessere Lesbarkeit */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            background-color: #1f1f1f; /* Dunklerer Header Hintergrund */
+            color: #e0e0e0; /* Helle Textfarbe im Header */
+            padding: 60px 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7); /* Dunklerer Schatten für besseren Kontrast */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        header img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer; /* Zeigt, dass das Logo klickbar ist */
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+        .impressum {
+            background-color: #bd0940; /* Dunkler Hintergrund für die Box */
+            color: #e0e0e0; /* Helle Textfarbe in der Box */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 15px; /* Abrunden der Ecken */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7); /* Dunklerer Schatten für die Box */
+            text-decoration: none; /* Entfernt die Standard-Link-Unterstreichung */
+            max-width: 600px;
+            margin: 40px auto;
+        }
+        .impressum p {
+            font-size: 1em;
+        }
+        footer {
+            background-color: #1f1f1f; /* Dunkler Footer Hintergrund */
+            color: #e0e0e0; /* Helle Textfarbe im Footer */
+            text-align: center;
+            padding: 10px 0;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html">
+            <img id="logo" src="logo.png" alt="Logo">
+        </a>
+        <h1>Impressum</h1>
+    </header>
+    <main>
+        <div class="impressum">
+            <p>Diese Webseite ist rein privat und verfolgt keine kommerziellen Zwecke.</p>
+            <p>Verantwortlich für den Inhalt:</p>
+            <p>
+                Max Mustermann<br>
+                Musterstraße 123<br>
+                12345 Musterstadt<br>
+                Deutschland
+            </p>
+            <p>E-Mail: max.mustermann@example.com</p>
+            <p>Diese Webseite dient ausschließlich privaten Zwecken und enthält keine Werbung oder geschäftlichen Inhalte.</p>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2024 Himbeerkuchen. Alle Rechte vorbehalten.</p>
+    </footer>
+</body>
+</html>

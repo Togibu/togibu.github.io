@@ -14,7 +14,6 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            overflow: hidden; /* Verhindert Scrollen, um den Effekt zu optimieren */
         }
         header {
             background-color: #1f1f1f; /* Dunklerer Header Hintergrund */
@@ -115,25 +114,12 @@
         .impressum-button:hover {
             background-color: #555; /* Etwas hellere Farbe beim Hover-Effekt */
         }
-        .sparkle {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: radial-gradient(circle, #ffcc00, transparent);
-            border-radius: 50%;
-            pointer-events: none;
-            animation: sparkle 0.5s ease-out infinite;
-        }
-        @keyframes sparkle {
-            0% { opacity: 1; transform: scale(1); }
-            100% { opacity: 0; transform: scale(2); }
-        }
     </style>
 </head>
 <body>
     <header>
         <img id="logo" src="logo.png" alt="Logo" ondblclick="moveLogo()"> <!-- Event für doppeltes Klicken -->
-        <h1>Willkommen auf unserer Website!</h1>
+        <h1>Unsere Homepage!</h1>
     </header>
     <main>
         <div class="rpi-container">
@@ -142,6 +128,11 @@
         </div>
         <p>Wir basteln (viel) mit dem Rasberry pi und anderem tech krams, und würden euch gerne unsere besten Projekte zeigen.</p>
         
+        
+        <!-- Neuer Abschnitt mit Überschrift und Haupttext -->
+        <!--<h2>Unsere Mission</h2>
+        <p>Unser Ziel ist es, innovative Lösungen zu entwickeln, die den Alltag der Menschen erleichtern. Durch kontinuierliche Forschung und Entwicklung streben wir danach, technologische Fortschritte voranzutreiben und nachhaltige, benutzerfreundliche Produkte zu schaffen, die die Welt ein Stück besser machen.</p>-->
+
         <!-- NAS Box -->
         <a href="projekte.html" class="box">Projekte</a>
     </main>
@@ -151,9 +142,6 @@
 
     <!-- Impressum Button -->
     <a href="impressum.html" class="impressum-button">Impressum</a>
-
-    <!-- Container für Glitzer Effekte -->
-    <div id="sparkles"></div>
 
     <script>
         function moveLogo() {
@@ -169,20 +157,11 @@
             logo.style.transition = 'transform 1s ease-out'; // Dauer und Übergang der Animation
             logo.style.transform = `translate(${randomX}px, ${randomY}px)`;
         }
-
-        // Fügt Glitzer Effekte hinzu, die der Maus folgen
-        document.addEventListener('mousemove', function(e) {
-            var sparkle = document.createElement('div');
-            sparkle.className = 'sparkle';
-            sparkle.style.left = e.pageX + 'px';
-            sparkle.style.top = e.pageY + 'px';
-            document.body.appendChild(sparkle);
-
-            // Entfernt den Glitzer nach einer Weile
-            setTimeout(function() {
-                sparkle.remove();
-            }, 500);
-        });
     </script>
 </body>
 </html>
+<!--       _
+       .__(.)< (MEOW)
+        \___)   
+ ~~~~~~~~~~~~~~~~~~
+lizensed by Amazon-->
