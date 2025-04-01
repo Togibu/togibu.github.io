@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mods</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            font-family: Verdana, sans-serif;
+            overflow: hidden;
+        }
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .background-container img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+        }
+        .content {
+            text-align: center;
+            font-size: 40px;
+            font-weight: bold;
+            margin-top: 20vh;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+        .text-content {
+            margin: 50px auto;
+            width: 80%;
+            max-width: 800px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <img src="bg1.png" alt="Background 1">
+        <img src="bg2.png" alt="Background 2">
+        <img src="bg3.png" alt="Background 3">
+        <img src="bg4.png" alt="Background 4">
+        <img src="bg5.png" alt="Background 5">
+        <img src="bg6.png" alt="Background 6">
+        <img src="bg7.png" alt="Background 7">
+        <img src="bg8.png" alt="Background 8">
+        <img src="bg9.png" alt="Background 9">
+        <img src="bg10.png" alt="Background 10">
+        <img src="bg11.png" alt="Background 11">
+        <img src="bg12.png" alt="Background 12">
+        <img src="bg13.png" alt="Background 13">
+        <img src="bg14.png" alt="Background 14">
+        <img src="bg15.png" alt="Background 15">
+        <img src="bg16.png" alt="Background 16">
+        <img src="bg17.png" alt="Background 17">
+        <img src="bg18.png" alt="Background 18">
+        <img src="bg19.png" alt="Background 19">
+        <img src="bg20.png" alt="Background 20">
+        <img src="bg21.png" alt="Background 21">
+        <img src="bg22.png" alt="Background 22">
+        <img src="bg23.png" alt="Background 23">
+    </div>
+    <div class="content">Mods</div>
+    <div class="text-content">
+        <p>Hier siehst du die erlaubten Mods und die verbotenen Mods. Alle anderen Mods sind auf eigene Gefahr zu nutzen</p>
+        <p>Erlaubte Mods:</p>
+        <p>Better F1 Reborn, Better F3, Better Third Person, Chat Heads, Chest Tracker, Controllify, Do a Barrel Roll, Flashback/replay Mod, Freecam, Freeloock, Fullbright, Inventory Profiles Next, InvMove, low on fire/low shield, Mouse Tweaks, Ortho Camera, Simple Armor HUD, ViaFabricPlus, Watut, Xaeros Minimap/Worldmap, Zoomify</p>
+        <p>Verbotene Mods:</p>
+        <p>Hack Clients/Mods wie Meteor, X-Ray Mods/Reccourcepacks</p>
+    </div>
+
+    <script>
+        const images = document.querySelectorAll('.background-container img');
+        let index = 0;
+
+        function changeBackground() {
+            images.forEach(img => img.style.opacity = '0');
+            images[index].style.opacity = '1';
+            index = (index + 1) % images.length;
+        }
+
+        setInterval(changeBackground, 6500);
+        changeBackground();
+    </script>
+</body>
+</html>
