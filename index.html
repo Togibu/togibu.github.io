@@ -45,8 +45,7 @@
             height: 100px;
             border-radius: 15px;
         }
-        .discord-button {
-            background-color: #7289da;
+        .button {
             color: white;
             border: none;
             padding: 20px 40px;
@@ -55,14 +54,21 @@
             display: inline-block;
             font-size: 20px;
             font-family: Verdana, sans-serif;
-            margin: 20px auto;
+            margin: 10px auto;
             cursor: pointer;
             border-radius: 20px;
             position: absolute;
-            bottom: 50px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 2;
+        }
+        .download-button {
+            background-color: #eea319;
+            top: 75%;
+        }
+        .discord-button {
+            background-color: #7289da;
+            bottom: 50px;
         }
     </style>
 </head>
@@ -96,7 +102,8 @@
         <img src="logo.jpg" alt="Logo">
         <h1>Lamacraft</h1>
     </header>
-    <a href="https://discord.gg/WbDGbAGYcH" class="discord-button">Discord</a>
+    <a href="https://drive.google.com/drive/folders/11knv7d_Os-u-jvsO36ATdV9w4sgLm4jO?usp=sharing" class="button download-button">Download Rustic Theme World</a>
+    <a href="https://discord.com/invite/WbDGbAGYcH" class="button discord-button">Discord</a>
 
     <script>
         const images = document.querySelectorAll('.background-container img');
