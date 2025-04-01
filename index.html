@@ -64,11 +64,19 @@
         }
         .download-button {
             background-color: #eea319;
-            top: 75%;
+            top: 90%;
         }
         .discord-button {
             background-color: #7289da;
-            bottom: 50px;
+            top: 70%;
+        }
+        .copy-button {
+            background-color: #4CAF50;
+            top: 80%;
+        }
+        .mods-button {
+            background-color: #ff5733;
+            top: 60%;
         }
     </style>
 </head>
@@ -104,6 +112,8 @@
     </header>
     <a href="https://drive.google.com/drive/folders/11knv7d_Os-u-jvsO36ATdV9w4sgLm4jO?usp=sharing" class="button download-button">Download Rustic Theme World</a>
     <a href="https://discord.com/invite/WbDGbAGYcH" class="button discord-button">Discord</a>
+    <button class="button copy-button" onclick="copyServerLink()">Copy Server Link</button>
+    <a href="mods.html" class="button mods-button">Mods</a>
 
     <script>
         const images = document.querySelectorAll('.background-container img');
@@ -115,8 +125,15 @@
             index = (index + 1) % images.length;
         }
 
-        setInterval(changeBackground, 6500); // 5 Sekunden stehen bleiben + 1.5 Sekunden Übergang
-        changeBackground(); // Startet sofort
+        setInterval(changeBackground, 6500);
+        changeBackground();
+
+        function copyServerLink() {
+            const serverIP = "mc.lamacraft.net";
+            navigator.clipboard.writeText(serverIP).then(() => {
+                alert("Server-Link kopiert: " + serverIP);
+            });
+        }
     </script>
 </body>
 </html>
