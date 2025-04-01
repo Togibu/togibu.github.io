@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lamacraft</title>
-s    <style>
+    <style>
         html, body {
             height: 100%;
             margin: 0;
@@ -16,20 +16,17 @@ s    <style>
             position: fixed;
             top: 0;
             left: 0;
-            width: 2300%;
+            width: 100%;
             height: 100%;
-            display: flex;
-            animation: slideBackground 115s linear infinite;
             z-index: -1;
         }
         .background-container img {
-            width: 4.35%;
+            position: absolute;
+            width: 100%;
             height: 100%;
             object-fit: cover;
-        }
-        @keyframes slideBackground {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-95.65%); }
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
         }
         header {
             background-color: rgba(211, 211, 211, 0.8);
@@ -100,5 +97,19 @@ s    <style>
         <h1>Lamacraft</h1>
     </header>
     <a href="https://discord.com" class="discord-button">Discord</a>
+
+    <script>
+        const images = document.querySelectorAll('.background-container img');
+        let index = 0;
+
+        function changeBackground() {
+            images.forEach(img => img.style.opacity = '0');
+            images[index].style.opacity = '1';
+            index = (index + 1) % images.length;
+        }
+
+        setInterval(changeBackground, 6500); // 5 Sekunden stehen bleiben + 1.5 Sekunden Übergang
+        changeBackground(); // Startet sofort
+    </script>
 </body>
 </html>
