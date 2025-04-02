@@ -36,6 +36,11 @@
             font-family: Verdana, sans-serif;
             position: relative;
             z-index: 2;
+            transition: opacity 1s ease-in-out;
+        }
+        header.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
         header img {
             position: absolute;
@@ -61,6 +66,11 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 2;
+            transition: opacity 1s ease-in-out;
+        }
+        .button.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
         .download-button {
             background-color: #eea319;
@@ -78,13 +88,9 @@
             background-color: #ff5733;
             top: 60%;
         }
-        .dia-button {
-            background-color: #007BFF;
-            top: 50%;
-        }
     </style>
 </head>
-<body>
+<body onclick="showElements()">
     <div class="background-container">
         <img src="bg1.png" alt="Background 1">
         <img src="bg2.png" alt="Background 2">
@@ -110,7 +116,7 @@
         <img src="bg22.png" alt="Background 22">
         <img src="bg23.png" alt="Background 23">
     </div>
-    <header>
+    <header id="header">
         <img src="logo.jpg" alt="Logo">
         <h1>Lamacraft</h1>
     </header>
@@ -118,11 +124,11 @@
     <a href="https://discord.com/invite/WbDGbAGYcH" class="button discord-button">Discord</a>
     <button class="button copy-button" onclick="copyServerLink()">Copy Server Link</button>
     <a href="mods.html" class="button mods-button">Mods</a>
-    <a href="dia.html" class="button dia-button">Dia</a>
 
     <script>
         const images = document.querySelectorAll('.background-container img');
         let index = 0;
+        let hideTimeout;
 
         function changeBackground() {
             images.forEach(img => img.style.opacity = '0');
@@ -139,6 +145,23 @@
                 alert("Server-Link kopiert: " + serverIP);
             });
         }
+
+        // Hide header and buttons
+        function hideElements() {
+            document.getElementById('header').classList.add('hidden');
+            document.querySelectorAll('.button').forEach(button => button.classList.add('hidden'));
+        }
+
+        // Show header and buttons and reset the hide timer
+        function showElements() {
+            document.getElementById('header').classList.remove('hidden');
+            document.querySelectorAll('.button').forEach(button => button.classList.remove('hidden'));
+            clearTimeout(hideTimeout);
+            hideTimeout = setTimeout(hideElements, 20000); // Hide again after 20 seconds
+        }
+
+        // Initial hide after 20 seconds
+        hideTimeout = setTimeout(hideElements, 20000);
     </script>
 </body>
 </html>
