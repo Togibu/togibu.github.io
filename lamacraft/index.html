@@ -42,6 +42,9 @@
             opacity: 0;
             pointer-events: none;
         }
+        header a {
+            text-decoration: none;
+        }
         header img {
             position: absolute;
             left: 20px;
@@ -49,6 +52,7 @@
             transform: translateY(-50%);
             height: 100px;
             border-radius: 15px;
+            cursor: pointer;
         }
         .button {
             color: white;
@@ -117,7 +121,9 @@
         <img src="bg23.png" alt="Background 23">
     </div>
     <header id="header">
-        <img src="logo.jpg" alt="Logo">
+        <a href="../index.html">
+            <img src="logo.jpg" alt="Logo">
+        </a>
         <h1>Lamacraft</h1>
     </header>
     <a href="https://drive.google.com/drive/folders/11knv7d_Os-u-jvsO36ATdV9w4sgLm4jO?usp=sharing" class="button download-button">Download older Server Worlds</a>
