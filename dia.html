@@ -30,7 +30,7 @@
         }
         header {
             background-color: rgba(211, 211, 211, 0.8);
-            padding: 20px;
+            padding: 60px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             text-align: center;
             font-family: Verdana, sans-serif;
@@ -40,47 +40,10 @@
         header img {
             position: absolute;
             left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
+            top: 10px; /* Verschiebt das Logo weiter nach unten */
             height: 100px;
             border-radius: 15px;
-        }
-        .button {
-            color: white;
-            border: none;
-            padding: 20px 40px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 20px;
-            font-family: Verdana, sans-serif;
-            margin: 10px auto;
             cursor: pointer;
-            border-radius: 20px;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 2;
-        }
-        .download-button {
-            background-color: #eea319;
-            top: 90%;
-        }
-        .discord-button {
-            background-color: #7289da;
-            top: 70%;
-        }
-        .copy-button {
-            background-color: #4CAF50;
-            top: 80%;
-        }
-        .mods-button {
-            background-color: #ff5733;
-            top: 60%;
-        }
-        .dia-button {
-            background-color: #007BFF;
-            top: 50%;
         }
     </style>
 </head>
@@ -111,14 +74,10 @@
         <img src="bg23.png" alt="Background 23">
     </div>
     <header>
-        <img src="logo.jpg" alt="Logo">
-        <h1>Lamacraft</h1>
+        <a href="index.html">
+            <img src="logo.jpg" alt="Logo">
+        </a>
     </header>
-    <a href="https://drive.google.com/drive/folders/11knv7d_Os-u-jvsO36ATdV9w4sgLm4jO?usp=sharing" class="button download-button">Download older Server Worlds</a>
-    <a href="https://discord.com/invite/WbDGbAGYcH" class="button discord-button">Discord</a>
-    <button class="button copy-button" onclick="copyServerLink()">Copy Server Link</button>
-    <a href="mods.html" class="button mods-button">Mods</a>
-    <a href="dia.html" class="button dia-button">Dia</a>
 
     <script>
         const images = document.querySelectorAll('.background-container img');
@@ -132,13 +91,6 @@
 
         setInterval(changeBackground, 4500);
         changeBackground();
-
-        function copyServerLink() {
-            const serverIP = "s-especially.joinmc.link";
-            navigator.clipboard.writeText(serverIP).then(() => {
-                alert("Server-Link kopiert: " + serverIP);
-            });
-        }
     </script>
 </body>
 </html>
