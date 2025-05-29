@@ -197,21 +197,28 @@
             });
         }
 
-        // Serverstatus abrufen und anzeigen
-        fetch('https://api.mcsrvstat.us/3/s-especially.joinmc.link')
-            .then(response => response.json())
-            .then(data => {
-                const statusElem = document.getElementById('server-status');
-                if (data.online) {
-                    statusElem.textContent = `🟢 Server online (${data.players.online} Spieler)`;
-                } else {
-                    statusElem.textContent = '🔴 Server offline';
-                }
-            })
-            .catch(() => {
-                const statusElem = document.getElementById('server-status');
-                statusElem.textContent = 'Fehler beim Laden des Serverstatus.';
-            });
+        // Funktion zum Abrufen und Anzeigen des Serverstatus
+        function updateServerStatus() {
+            fetch('https://api.mcsrvstat.us/3/s-especially.joinmc.link')
+                .then(response => response.json())
+                .then(data => {
+                    const statusElem = document.getElementById('server-status');
+                    if (data.online) {
+                        statusElem.textContent = `🟢 Server online (${data.players.online} Spieler)`;
+                    } else {
+                        statusElem.textContent = '🔴 Server offline';
+                    }
+                })
+                .catch(() => {
+                    const statusElem = document.getElementById('server-status');
+                    statusElem.textContent = 'Fehler beim Laden des Serverstatus.';
+                });
+        }
+
+        // Beim Laden der Seite einmal ausführen
+        updateServerStatus();
+        // Dann jede Minute erneut abrufen
+        setInterval(updateServerStatus, 60000);
 
         // Initiales Ausblenden nach 20 Sekunden
         hideTimeout = setTimeout(hideElements, 20000);
