@@ -198,14 +198,14 @@
         }
 
         // Serverstatus abrufen und anzeigen
-        fetch('https://api.mcsrvstat.us/debug/ping/s-especially.joinmc.link')
+        fetch('https://api.mcsrvstat.us/3/s-especially.joinmc.link')
             .then(response => response.json())
             .then(data => {
                 const statusElem = document.getElementById('server-status');
-                if (data.error === "No address to query.") {
-                    statusElem.textContent = '🔴 Server offline';
+                if (data.online) {
+                    statusElem.textContent = `🟢 Server online (${data.players.online} Spieler)`;
                 } else {
-                    statusElem.textContent = '🟢 Server online';
+                    statusElem.textContent = '🔴 Server offline';
                 }
             })
             .catch(() => {
