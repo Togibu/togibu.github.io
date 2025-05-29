@@ -221,7 +221,7 @@
         // Beim Laden der Seite einmal ausführen
         updateServerStatus();
         // Dann jede Minute erneut abrufen
-        setInterval(updateServerStatus, 60000);
+        setInterval(updateServerStatus, 10000);
 
         // Initiales Ausblenden nach 20 Sekunden
         hideTimeout = setTimeout(hideElements, 20000);
