@@ -204,7 +204,10 @@
                 .then(data => {
                     const statusElem = document.getElementById('server-status');
                     if (data.online) {
-                        statusElem.textContent = `🟢 Server online (${data.players.online} Spieler)`;
+                        const playerCount = data.players && typeof data.players.online === 'number'
+                            ? data.players.online
+                            : 0;
+                        statusElem.textContent = `🟢 Server online (${playerCount} Spieler)`;
                     } else {
                         statusElem.textContent = '🔴 Server offline';
                     }
