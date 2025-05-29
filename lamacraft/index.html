@@ -151,6 +151,7 @@
         <h2>Willkommen bei Lamacraft!</h2>
         <p>Hier kannst du alle wichtigen Informationen über unseren Server finden.</p>
         <p>Besuche uns auf Discord für weitere Informationen und Updates.</p>
+        <p id="server-status">Serverstatus wird geladen...</p>
     </div>
 
     <script>
@@ -195,6 +196,22 @@
                 alert("Server-Link kopiert: " + serverLink);
             });
         }
+
+        // Serverstatus abrufen und anzeigen
+        fetch('https://api.mcsrvstat.us/debug/ping/s-especially.joinmc.link')
+            .then(response => response.json())
+            .then(data => {
+                const statusElem = document.getElementById('server-status');
+                if (data.error === "No address to query.") {
+                    statusElem.textContent = '🔴 Server offline';
+                } else {
+                    statusElem.textContent = '🟢 Server online';
+                }
+            })
+            .catch(() => {
+                const statusElem = document.getElementById('server-status');
+                statusElem.textContent = 'Fehler beim Laden des Serverstatus.';
+            });
 
         // Initiales Ausblenden nach 20 Sekunden
         hideTimeout = setTimeout(hideElements, 20000);
