@@ -185,15 +185,10 @@
         </div>
     </header>
 
+    <!-- Serverstatus jetzt HIER -->
+    <div id="server-status" class="server-status-block">Serverstatus wird geladen...</div>
+
     <div class="content">
-        <div id="server-status" class="server-status-block">Serverstatus wird geladen...</div>
-
-        <div style="display: flex; justify-content: center; margin-bottom: 40px;" id="discord-widget">
-            <iframe src="https://discord.com/widget?id=1338086864682483845&theme=dark"
-                width="350" height="500" allowtransparency="true" frameborder="0"
-                sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
-        </div>
-
         <h2>Willkommen bei Lamacraft!</h2>
         <p>Hier kannst du alle wichtigen Informationen über unseren Server finden.</p>
         <p>Besuche uns auf Discord für weitere Informationen und Updates.</p>
@@ -208,6 +203,7 @@
     <script>
         const images = document.querySelectorAll('.background-container img');
         let index = 0;
+        let hideTimeout;
 
         // Hintergrundbilder wechseln
         function changeBackground() {
@@ -223,11 +219,13 @@
         function hideElements() {
             document.getElementById('header').classList.add('hidden');
             document.getElementById('menu').style.display = 'none';
+            document.getElementById('server-status').classList.add('hidden');
         }
 
         // Header anzeigen und Timer zurücksetzen
         function showElements() {
             document.getElementById('header').classList.remove('hidden');
+            document.getElementById('server-status').classList.remove('hidden');
             clearTimeout(hideTimeout);
             hideTimeout = setTimeout(hideElements, 20000); // Nach 20 Sekunden ausblenden
         }
