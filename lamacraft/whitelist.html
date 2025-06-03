@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lamacraft</title>
+    <title>Whitelist ist aktuell deaktiviert</title>
     <style>
         html, body {
             height: 100%;
@@ -197,17 +197,14 @@
         <a href="../index.html">
             <img src="logo.jpg" alt="Logo">
         </a>
-        <h1>Lamacraft</h1>
+        <h1>Whitelist ist aktuell deaktiviert</h1>
         <div class="menu-icon" onclick="toggleMenu(event)">
             <div></div>
             <div></div>
             <div></div>
         </div>
         <div class="menu" id="menu">
-            <a href="https://drive.google.com/drive/folders/11knv7d_Os-u-jvsO36ATdV9w4sgLm4jO?usp=sharing">Download older Server Worlds</a>
-            <a href="https://discord.com/invite/WbDGbAGYcH">Discord</a>
-            <a href="mods.html">Mods</a>
-            <button onclick="copyServerLink()">Copy Server Link</button>
+            <a href="lamacraft/index.html">Go to Lamacraft</a>
         </div>
     </header>
 
@@ -220,38 +217,25 @@
                 sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
         </div>
 
-        <h2>Willkommen bei Lamacraft!</h2>
-        <p>Hier kannst du alle wichtigen Informationen über unseren Server finden.</p>
-        <p>Besuche uns auf Discord für weitere Informationen und Updates.</p>
-        <p><strong>Hier sind einige wichtige Informationen:</strong></p>
-        <p>🌍 IP-Adresse: <strong>s-especially.joinmc.link</strong></p>
-        <p>🖥️ Version: <strong>1.21.5</strong></p>
-        <p>🔁 ViaVersion: <strong>Auch ältere Minecraft-Versionen werden unterstützt</strong></p>
-        <p>🕒 Online: <strong>24/7</strong> (täglicher Neustart um 03:00 Uhr – ca. 5 Minuten)</p>
-        <p>🧱 Modus: <strong>Survival Multiplayer (SMP) – klassisches Minecraft</strong></p>
-        <p>📜 Whitelist: <strong>Aktuell deaktiviert. Aber schaden kann es nie! Lass dich eintragen!</strong></p>
+        <!-- Eingabebereich für Minecraft-Username -->
+        <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px;">
+            <input 
+                type="text" 
+                id="usernameInput" 
+                placeholder="Minecraft-Username" 
+                style="padding: 10px; font-size: 16px; width: 300px; border: 1px solid #ccc; border-radius: 5px;"
+            >
+            <button 
+                onclick="sendUsername()" 
+                style="padding: 10px 20px; font-size: 16px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;"
+            >
+                Senden
+            </button>
+        </div>
 
-        <div style="margin-top: 40px;">
-            <!-- Eingabebereich für Minecraft-Username -->
-            <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px;">
-                <input 
-                    type="text" 
-                    id="usernameInput" 
-                    placeholder="Minecraft-Username" 
-                    style="padding: 10px; font-size: 16px; width: 300px; border: 1px solid #ccc; border-radius: 5px;"
-                >
-                <button 
-                    onclick="sendUsername()" 
-                    style="padding: 10px 20px; font-size: 16px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;"
-                >
-                    Senden
-                </button>
-            </div>
-
-            <!-- Animationselement -->
-            <div id="successAnimation" class="success-animation hidden">
-                ✔️ Erfolgreich gesendet!
-            </div>
+        <!-- Animationselement -->
+        <div id="successAnimation" class="success-animation hidden">
+            ✔️ Erfolgreich gesendet!
         </div>
     </div>
 
