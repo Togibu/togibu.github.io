@@ -10,7 +10,8 @@
             margin: 0;
             display: flex;
             flex-direction: column;
-            overflow: auto; /* Ermöglicht Scrollen */
+            overflow: auto;
+            font-family: Verdana, sans-serif;
         }
         .background-container {
             position: fixed;
@@ -94,6 +95,72 @@
             text-align: center;
             font-family: Verdana, sans-serif;
             color: rgb(211, 234, 7);
+            margin-bottom: 48px; /* Mehr Abstand zu den Kacheln */
+        }
+        .tiles-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 32px;
+            margin: 40px auto;
+            max-width: 1200px;
+            padding: 0 16px;
+        }
+        @media (min-width: 600px) {
+            .tiles-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (min-width: 1100px) {
+            .tiles-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        .tile {
+            background: rgba(255,255,255,0.85);
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-decoration: none;
+            transition: box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .tile:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+        .tile-header {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            gap: 16px;
+        }
+        .tile-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            flex: 1;
+            color: #222;
+        }
+        .tile-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        .tile-desc {
+            margin-top: 12px;
+            color: #444;
+            font-size: 1em;
+            width: 100%;
+            word-break: break-word;
+        }
+
+        /* Responsive: 4 Kacheln ab 900px Breite */
+        @media (min-width: 900px) {
+            .tiles-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
         }
     </style>
 </head>
@@ -147,6 +214,45 @@
         <p>In der Nächsten Zeit kommt hoffentlich aber noch mehr!</p>
         <p>Drücke einfach auf die drei Striche oben rechts und dann auf Lamacraft</p>
         <p>Besuche uns auf Discord für weitere Informationen und Updates.</p>
+    </div>
+
+    <div class="tiles-container">
+        <a class="tile" href="lamacraft/index.html">
+            <div class="tile-header">
+                <span class="tile-title">Lamacraft</span>
+                <img src="lamacraft/logo.jpg" alt="Logo" class="tile-logo">
+            </div>
+            <div class="tile-desc">
+                Minecraft-Server in der Version 1.21.5. Informationen, Downloads und Neuigkeiten rund um Lamacraft findest du hier.
+            </div>
+        </a>
+        <a class="tile" href="https://github.com/Togibu/car-game">
+            <div class="tile-header">
+                <span class="tile-title">Car Game</span>
+                <img src="logos/police.png" alt="Logo" class="tile-logo">
+            </div>
+            <div class="tile-desc">
+                Ein kleines Rennspiel, das ich mit Justus in Unity gebaut habe. Teste es gerne aus – Namensvorschläge sind willkommen!
+            </div>
+        </a>
+        <a class="tile" href="https://leo.redeker.org">
+            <div class="tile-header">
+                <span class="tile-title">Birdwatcher</span>
+                <img src="logos/birdylogo.png" alt="Logo" class="tile-logo">
+            </div>
+            <div class="tile-desc">
+                Ein Python-Tool, das automatisch Fotos aus dem Nistkasten macht und in der Nextcloud speichert.
+            </div>
+        </a>
+        <a class="tile" href="https://leo.redeker.org">
+            <div class="tile-header">
+                <span class="tile-title">Website</span>
+                <img src="logos/platine.png" alt="Logo" class="tile-logo">
+            </div>
+            <div class="tile-desc">
+                Übersicht über verschiedene Projekte, Tools und Informationen. Entdecke die Inhalte über das Menü oder die Kacheln.
+            </div>
+        </a>
     </div>
 
     <script>
