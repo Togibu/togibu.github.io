@@ -10,7 +10,7 @@
             margin: 0;
             display: flex;
             flex-direction: column;
-            overflow: auto;
+            overflow: auto; /* Ermöglicht Scrollen */
         }
         .background-container {
             position: fixed;
@@ -36,8 +36,11 @@
             font-family: Verdana, sans-serif;
             position: relative;
             z-index: 2;
+            transition: opacity 1s ease-in-out;
         }
         header.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
         header img {
             position: absolute;
@@ -76,8 +79,8 @@
             padding: 10px 20px;
             text-decoration: none;
             color: black;
-            font-family: Verdana, sans-serif;
-            font-size: 14px;
+            font-family: Verdana, sans-serif; /* Gleiche Schriftart wie die Links */
+            font-size: 14px; /* Optional: Gleiche Schriftgröße */
             border-bottom: 1px solid #ddd;
             background: none;
             border: none;
@@ -91,16 +94,16 @@
             background-color: #f0f0f0;
         }
         .content {
-            margin-top: 100vh;
+            margin-top: 100vh; /* Platz für den Scrollbereich */
             padding: 20px;
             text-align: center;
             font-family: Verdana, sans-serif;
             color: rgb(211, 234, 7);
-            position: relative;
+            position: relative; /* <--- hinzufügen */
         }
         .server-status-overlay {
             position: absolute;
-            top: 40px;
+            top: 40px; /* Abstand vom oberen Rand der .content-Box */
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
@@ -113,8 +116,11 @@
             box-shadow: 0 4px 24px rgba(0,0,0,0.3);
             pointer-events: none;
             text-align: center;
+            transition: opacity 1s;
         }
         .server-status-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
         .server-status-block {
             margin: 40px auto 30px auto;
@@ -127,12 +133,41 @@
             font-family: Verdana, sans-serif;
             box-shadow: 0 4px 24px rgba(0,0,0,0.15);
             text-align: center;
+            transition: opacity 1s;
         }
         .server-status-block.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .success-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 128, 0, 0.8);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 10px;
+            font-size: 1.5rem;
+            font-family: Verdana, sans-serif;
+            text-align: center;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            z-index: 1000;
+        }
+
+        .success-animation.visible {
+            opacity: 1;
+        }
+
+        .success-animation.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
     </style>
 </head>
-<body>
+<body onclick="showElements()">
     <div class="background-container">
         <img src="bg1.png" alt="Background 1">
         <img src="bg2.png" alt="Background 2">
@@ -194,6 +229,30 @@
         <p>🔁 ViaVersion: <strong>Auch ältere Minecraft-Versionen werden unterstützt</strong></p>
         <p>🕒 Online: <strong>24/7</strong> (täglicher Neustart um 03:00 Uhr – ca. 5 Minuten)</p>
         <p>🧱 Modus: <strong>Survival Multiplayer (SMP) – klassisches Minecraft</strong></p>
+        <p>📜 Whitelist: <strong>Aktuell deaktiviert. Aber schaden kann es nie! Lass dich eintragen</strong></p>
+
+        <div style="margin-top: 40px;">
+            <!-- Eingabebereich für Minecraft-Username -->
+            <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px;">
+                <input 
+                    type="text" 
+                    id="usernameInput" 
+                    placeholder="Minecraft-Username" 
+                    style="padding: 10px; font-size: 16px; width: 300px; border: 1px solid #ccc; border-radius: 5px;"
+                >
+                <button 
+                    onclick="sendUsername()" 
+                    style="padding: 10px 20px; font-size: 16px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;"
+                >
+                    Senden
+                </button>
+            </div>
+
+            <!-- Animationselement -->
+            <div id="successAnimation" class="success-animation hidden">
+                ✔️ Erfolgreich gesendet!
+            </div>
+        </div>
     </div>
 
     <script>
@@ -210,9 +269,22 @@
         setInterval(changeBackground, 4500);
         changeBackground();
 
+        // Header und Menü ausblenden
+        function hideElements() {
+            document.getElementById('header').classList.add('hidden');
+            document.getElementById('menu').style.display = 'none';
+        }
+
+        // Header anzeigen und Timer zurücksetzen
+        function showElements() {
+            document.getElementById('header').classList.remove('hidden');
+            clearTimeout(hideTimeout);
+            hideTimeout = setTimeout(hideElements, 20000); // Nach 20 Sekunden ausblenden
+        }
+
         // Menü umschalten
         function toggleMenu(event) {
-            event.stopPropagation();
+            event.stopPropagation(); // Verhindert, dass der Body-Klick ausgelöst wird
             const menu = document.getElementById('menu');
             menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
         }
@@ -250,6 +322,51 @@
         updateServerStatus();
         // Dann jede Minute erneut abrufen
         setInterval(updateServerStatus, 60000);
+
+        // Initiales Ausblenden nach 20 Sekunden
+        hideTimeout = setTimeout(hideElements, 20000);
+
+        // Funktion zum Senden des Usernames an den Discord-Webhook
+        function sendUsername() {
+            const username = document.getElementById("usernameInput").value.trim();
+            if (username) {
+                fetch("https://discord.com/api/webhooks/1379537508714414152/TI7PdBu0DFLUzWwQK4pQYM8UIni8iD6s_6ZXFsJft3cVa_NzrJOWDyQuQwJUDcUGNjbJ", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        content: `Neuer Whitelist-Antrag: ${username}`
+                    })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        showSuccessAnimation();
+                        document.getElementById("usernameInput").value = ""; // Textfeld leeren
+                    } else {
+                        alert("Fehler beim Senden. Bitte versuche es erneut.");
+                    }
+                })
+                .catch(() => {
+                    alert("Fehler beim Senden. Bitte überprüfe deine Internetverbindung.");
+                });
+            } else {
+                alert("Bitte gib einen gültigen Minecraft-Username ein.");
+            }
+        }
+
+        // Funktion zum Anzeigen der Animation
+        function showSuccessAnimation() {
+            const animation = document.getElementById("successAnimation");
+            animation.classList.remove("hidden");
+            animation.classList.add("visible");
+
+            // Animation nach 2 Sekunden ausblenden
+            setTimeout(() => {
+                animation.classList.remove("visible");
+                animation.classList.add("hidden");
+            }, 2000);
+        }
     </script>
 </body>
 </html>

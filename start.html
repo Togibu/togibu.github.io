@@ -258,6 +258,7 @@
     <script>
         const images = document.querySelectorAll('.background-container img');
         let index = 0;
+        let hideTimeout;
 
         // Hintergrundbilder wechseln
         function changeBackground() {
@@ -269,12 +270,28 @@
         setInterval(changeBackground, 4500);
         changeBackground();
 
+        // Header und Menü ausblenden
+        function hideElements() {
+            document.getElementById('header').classList.add('hidden');
+            document.getElementById('menu').style.display = 'none';
+        }
+
+        // Header anzeigen und Timer zurücksetzen
+        function showElements() {
+            document.getElementById('header').classList.remove('hidden');
+            clearTimeout(hideTimeout);
+            hideTimeout = setTimeout(hideElements, 20000); // Nach 20 Sekunden ausblenden
+        }
+
         // Menü umschalten
         function toggleMenu(event) {
             event.stopPropagation(); // Verhindert, dass der Body-Klick ausgelöst wird
             const menu = document.getElementById('menu');
             menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
         }
+
+        // Initiales Ausblenden nach 20 Sekunden
+        hideTimeout = setTimeout(hideElements, 20000);
     </script>
 </body>
 </html>
