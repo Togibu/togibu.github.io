@@ -190,7 +190,7 @@
         <p>Hier kannst du alle wichtigen Informationen über unseren Server finden.</p>
         <p>Besuche uns auf Discord für weitere Informationen und Updates.</p>
         <p><strong>Hier sind einige wichtige Informationen:</strong></p>
-        <p>🌍 IP-Adresse: <strong>s-especially.joinmc.link</strong></p>
+        <p>🌍 IP-Adresse: <strong>limited-untitled.joinmc.link</strong></p>
         <p>🖥️ Version: <strong>1.21.5</strong></p>
         <p>🔁 ViaVersion: <strong>Auch ältere Minecraft-Versionen werden unterstützt</strong></p>
         <p>🕒 Online: <strong>24/7</strong> (täglicher Neustart um 03:00 Uhr – ca. 5 Minuten)</p>
@@ -220,7 +220,7 @@
 
         // Server-Link kopieren
         function copyServerLink() {
-            const serverLink = "s-especially.joinmc.link";
+            const serverLink = "limited-untitled.joinmc.link";
             navigator.clipboard.writeText(serverLink).then(() => {
                 alert("Server-Link kopiert: " + serverLink);
             });
@@ -228,7 +228,7 @@
 
         // Funktion zum Abrufen und Anzeigen des Serverstatus
         function updateServerStatus() {
-            fetch('https://api.mcsrvstat.us/3/s-especially.joinmc.link')
+            fetch('https://api.mcsrvstat.us/3/limited-untitled.joinmc.link')
                 .then(response => response.json())
                 .then(data => {
                     const statusElem = document.getElementById('server-status');
