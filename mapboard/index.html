@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Map Whiteboard mit Firebase</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    body { margin:0; font-family:sans-serif; }
+    #map { height: 100vh; width:100vw; }
+
+    #menu {
+      position:absolute;
+      bottom:20px;
+      left:50%;
+      transform:translateX(-50%);
+      background: rgba(255,255,255,0.95);
+      border-radius:12px;
+      padding:10px 20px;
+      display:flex;
+      gap:10px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.3);
+      z-index:1000;
+      flex-wrap:wrap;
+    }
+    #menu button { padding:6px 12px; border:none; border-radius:8px; background:#4CAF50; color:white; cursor:pointer; font-size:14px; }
+    #menu button.active { background:#2196F3; }
+    #menu input[type=color] { width:40px; height:30px; border:none; padding:0; cursor:pointer; }
+    #menu select { padding:5px; border-radius:5px; }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<div id="menu">
+  <button id="drawLine">Linien</button>
+  <button id="drawPin">Stecknadeln</button>
+  <button id="drawPoint">Punkte</button>
+  <button id="eraser">Radiergummi</button>
+  <input type="color" id="colorPicker" value="#FF0000" title="Farbe wählen">
+  <select id="weightPicker">
+    <option value="2">2px</option>
+    <option value="4">4px</option>
+    <option value="6">6px</option>
+    <option value="8">8px</option>
+  </select>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
+import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ===== Firebase Config =====
+const firebaseConfig = {
+  apiKey: "AIzaSyD40LMDAOVQSc8tZY61dxLk1kzgE3Kzv0Q",
+  authDomain: "mapboard-togibu.firebaseapp.com",
+  projectId: "mapboard-togibu",
+  storageBucket: "mapboard-togibu.appspot.com",
+  messagingSenderId: "1009766764003",
+  appId: "1:1009766764003:web:95a6344168d72abc15e4d6",
+  measurementId: "G-J4PTT2XY7X"
+};
+
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getFirestore(app);
+const linesCol = collection(db, "lines");
+
+// ===== Leaflet Map =====
+const map = L.map('map').setView([51.505, -0.09], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+const drawnItems = new L.FeatureGroup().addTo(map);
+const firebaseIdToLayer = new Map();
+
+// ===== Mode Handling =====
+let mode = null;
+let drawing = false;
+let currentLine = null;
+let currentPoints = [];
+let currentColor = document.getElementById('colorPicker').value;
+let currentWeight = parseInt(document.getElementById('weightPicker').value);
+
+const buttons = ['drawLine','drawPin','drawPoint','eraser'];
+buttons.forEach(id=>{
+  document.getElementById(id).onclick=()=>{
+    if(mode === id.replace('draw','').toLowerCase() || (id==='eraser' && mode==='eraser')) mode=null;
+    else mode = id==='eraser'? 'eraser' : id.replace('draw','').toLowerCase();
+    buttons.forEach(b=>document.getElementById(b).classList.remove('active'));
+    if(mode) document.getElementById(id).classList.add('active');
+  }
+});
+
+document.getElementById('colorPicker').addEventListener('input', e=>currentColor=e.target.value);
+document.getElementById('weightPicker').addEventListener('change', e=>currentWeight=parseInt(e.target.value));
+
+// ===== Zeichnen =====
+map.on('mousedown', e=>{
+  if(mode!=='line') return;
+  drawing=true;
+  currentPoints=[e.latlng];
+  currentLine=L.polyline(currentPoints, {color:currentColor, weight:currentWeight}).addTo(drawnItems);
+  map.dragging.disable();
+});
+
+map.on('mousemove', e=>{
+  if(!drawing || mode!=='line') return;
+  currentPoints.push(e.latlng);
+  currentLine.setLatLngs(currentPoints);
+});
+
+map.on('mouseup', async e=>{
+  if(!drawing || mode!=='line') return;
+  drawing=false;
+  map.dragging.enable();
+  if(currentPoints.length < 2) {
+    drawnItems.removeLayer(currentLine);
+    return;
+  }
+  try{
+    await addDoc(linesCol,{
+      type:'polyline',
+      points: currentPoints.map(p=>[p.lat,p.lng]),
+      color: currentColor,
+      weight: currentWeight,
+      timestamp: Date.now()
+    });
+  }catch(err){console.error(err);}
+});
+
+// ===== Marker / Punkt setzen / Radierer =====
+map.on('click', async e=>{
+  if(mode==='pin'){
+    try{
+      await addDoc(linesCol,{
+        type:'marker',
+        points:[e.latlng.lat,e.latlng.lng],
+        color:currentColor,
+        weight:currentWeight,
+        timestamp:Date.now()
+      });
+    }catch(err){console.error(err);}
+  }else if(mode==='point'){
+    try{
+      await addDoc(linesCol,{
+        type:'point',
+        points:[e.latlng.lat,e.latlng.lng],
+        color:currentColor,
+        weight:currentWeight,
+        timestamp:Date.now()
+      });
+    }catch(err){console.error(err);}
+  }else if(mode==='eraser'){
+    let foundId = null;
+    let minDist = 15;
+    const clickLatLng = e.latlng;
+    firebaseIdToLayer.forEach((layer, id) => {
+      let dist = Infinity;
+      if(layer.getLatLng){
+        dist = layer.getLatLng().distanceTo(clickLatLng);
+      }else if(layer.getLatLngs){
+        const latlngs = layer.getLatLngs();
+        for(let i=0;i<latlngs.length-1;i++){
+          const p1=latlngs[i], p2=latlngs[i+1];
+          const d = pointLineDistance(clickLatLng,p1,p2);
+          if(d < dist) dist = d;
+        }
+      }
+      if(dist < minDist){
+        foundId = id;
+        minDist = dist;
+      }
+    });
+    if(foundId){
+      try{
+        await deleteDoc(doc(db, "lines", foundId));
+      }catch(err){console.error(err);}
+    }
+  }
+});
+
+function pointLineDistance(p,a,b){
+  const A=map.latLngToLayerPoint(a), B=map.latLngToLayerPoint(b), P=map.latLngToLayerPoint(p);
+  const dx=B.x-A.x, dy=B.y-A.y;
+  if(dx===0 && dy===0) return P.distanceTo(A);
+  const t=((P.x-A.x)*dx + (P.y-A.y)*dy)/(dx*dx + dy*dy);
+  if(t<0) return P.distanceTo(A);
+  if(t>1) return P.distanceTo(B);
+  const proj=L.point(A.x+dx*t, A.y+dy*t);
+  return P.distanceTo(proj);
+}
+
+// ===== Live-Update aus Firestore =====
+onSnapshot(linesCol, snapshot=>{
+  snapshot.docChanges().forEach(change=>{
+    const id = change.doc.id;
+    const data = change.doc.data();
+
+    if(change.type==='added'){
+      let layer;
+      if(data.type==='polyline'){
+        const latlngs = data.points.map(p => L.latLng(p[0], p[1]));
+        layer = L.polyline(latlngs, {color:data.color||'#ff0000', weight:data.weight||2}).addTo(drawnItems);
+      }else if(data.type==='marker'){
+        layer = L.marker([data.points[0], data.points[1]]).addTo(drawnItems);
+      }else if(data.type==='point'){
+        layer = L.circleMarker([data.points[0], data.points[1]], {radius:5, color:data.color||'#2196F3'}).addTo(drawnItems);
+      }
+      if(layer) firebaseIdToLayer.set(id, layer);
+    }
+
+    if(change.type==='removed'){
+      const layer = firebaseIdToLayer.get(id);
+      if(layer){
+        drawnItems.removeLayer(layer);
+        firebaseIdToLayer.delete(id);
+      }
+    }
+  });
+});
+
+</script>
+</body>
+</html>
