@@ -155,23 +155,28 @@ map.on('click', async e=>{
     }catch(err){console.error(err);}
   }else if(mode==='eraser'){
     let foundId = null;
-    let minDist = 15;
+    let minDist = 30; // Schwelle für Marker/Punkte erhöht
     const clickLatLng = e.latlng;
     firebaseIdToLayer.forEach((layer, id) => {
       let dist = Infinity;
-      if(layer.getLatLng){
+      if(layer.getLatLng){ // Marker / Point
         dist = layer.getLatLng().distanceTo(clickLatLng);
-      }else if(layer.getLatLngs){
+        if(dist < minDist){
+          foundId = id;
+          minDist = dist;
+        }
+      }
+      // Linien werden wie bisher behandelt
+      else if(layer.getLatLngs){
         const latlngs = layer.getLatLngs();
         for(let i=0;i<latlngs.length-1;i++){
           const p1=latlngs[i], p2=latlngs[i+1];
           const d = pointLineDistance(clickLatLng,p1,p2);
-          if(d < dist) dist = d;
+          if(d < minDist){
+            foundId = id;
+            minDist = d;
+          }
         }
-      }
-      if(dist < minDist){
-        foundId = id;
-        minDist = dist;
       }
     });
     if(foundId){
