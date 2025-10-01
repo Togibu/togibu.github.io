@@ -63,7 +63,8 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+let analytics;
+try { analytics = getAnalytics(app); } catch(e) { /* no-op in non-https/dev */ }
 const db = getFirestore(app);
 const linesCol = collection(db, "lines");
 
@@ -108,8 +109,11 @@ map.on('mousedown', e=>{
 
 map.on('mousemove', e=>{
   if(!drawing || mode!=='line') return;
-  currentPoints.push(e.latlng);
-  currentLine.setLatLngs(currentPoints);
+  const last = currentPoints[currentPoints.length - 1];
+  if (!last || shouldAddPoint(last, e.latlng)) {
+    currentPoints.push(e.latlng);
+    currentLine.setLatLngs(currentPoints);
+  }
 });
 
 map.on('mouseup', async e=>{
@@ -121,13 +125,18 @@ map.on('mouseup', async e=>{
     return;
   }
   try{
+    const simplified = downsampleLatLngs(currentPoints, 3).map(p=>[p.lat, p.lng]);
     await addDoc(linesCol,{
       type:'polyline',
-      points: currentPoints.map(p=>[p.lat,p.lng]),
+      points: simplified,
       color: currentColor,
       weight: currentWeight,
       timestamp: Date.now()
     });
+    // remove temporary preview line; onSnapshot will render the persisted one
+    drawnItems.removeLayer(currentLine);
+    currentLine = null;
+    currentPoints = [];
   }catch(err){console.error(err);}
 });
 
@@ -139,7 +148,6 @@ map.on('click', async e=>{
         type:'marker',
         points:[e.latlng.lat,e.latlng.lng],
         color:currentColor,
-        weight:currentWeight,
         timestamp:Date.now()
       });
     }catch(err){console.error(err);}
@@ -155,27 +163,17 @@ map.on('click', async e=>{
     }catch(err){console.error(err);}
   }else if(mode==='eraser'){
     let foundId = null;
-    let minDist = 30; // Schwelle für Marker/Punkte erhöht
+    let minDist = 12; // pixel threshold for hit-testing
     const clickLatLng = e.latlng;
     firebaseIdToLayer.forEach((layer, id) => {
-      let dist = Infinity;
-      if(layer.getLatLng){ // Marker / Point
-        dist = layer.getLatLng().distanceTo(clickLatLng);
-        if(dist < minDist){
-          foundId = id;
-          minDist = dist;
-        }
-      }
-      // Linien werden wie bisher behandelt
-      else if(layer.getLatLngs){
+      if (layer.getLatLng) { // Marker / Point (single position)
+        const dist = pixelDistanceLatLng(layer.getLatLng(), clickLatLng);
+        if (dist < minDist) { foundId = id; minDist = dist; }
+      } else if (layer.getLatLngs) { // Polylines
         const latlngs = layer.getLatLngs();
-        for(let i=0;i<latlngs.length-1;i++){
-          const p1=latlngs[i], p2=latlngs[i+1];
-          const d = pointLineDistance(clickLatLng,p1,p2);
-          if(d < minDist){
-            foundId = id;
-            minDist = d;
-          }
+        for (let i = 0; i < latlngs.length - 1; i++) {
+          const d = pointLinePixelDistance(clickLatLng, latlngs[i], latlngs[i+1]);
+          if (d < minDist) { foundId = id; minDist = d; }
         }
       }
     });
@@ -198,6 +196,37 @@ function pointLineDistance(p,a,b){
   return P.distanceTo(proj);
 }
 
+function pixelDistanceLatLng(a, b) {
+  const A = map.latLngToLayerPoint(a);
+  const B = map.latLngToLayerPoint(b);
+  return A.distanceTo(B);
+}
+
+function pointLinePixelDistance(p, a, b) {
+  const A = map.latLngToLayerPoint(a), B = map.latLngToLayerPoint(b), P = map.latLngToLayerPoint(p);
+  const dx = B.x - A.x, dy = B.y - A.y;
+  if (dx === 0 && dy === 0) return P.distanceTo(A);
+  const t = ((P.x - A.x) * dx + (P.y - A.y) * dy) / (dx * dx + dy * dy);
+  if (t < 0) return P.distanceTo(A);
+  if (t > 1) return P.distanceTo(B);
+  const proj = L.point(A.x + dx * t, A.y + dy * t);
+  return P.distanceTo(proj);
+}
+
+function shouldAddPoint(prev, next) {
+  // only add if the mouse moved at least 4px
+  const A = map.latLngToLayerPoint(prev);
+  const B = map.latLngToLayerPoint(next);
+  return A.distanceTo(B) >= 4;
+}
+
+function downsampleLatLngs(latlngs, step = 3) {
+  const out = [];
+  for (let i = 0; i < latlngs.length; i += step) out.push(latlngs[i]);
+  if (latlngs.length % step !== 0) out.push(latlngs[latlngs.length - 1]);
+  return out;
+}
+
 // ===== Live-Update aus Firestore =====
 onSnapshot(linesCol, snapshot=>{
   snapshot.docChanges().forEach(change=>{
@@ -212,7 +241,13 @@ onSnapshot(linesCol, snapshot=>{
       }else if(data.type==='marker'){
         layer = L.marker([data.points[0], data.points[1]]).addTo(drawnItems);
       }else if(data.type==='point'){
-        layer = L.circleMarker([data.points[0], data.points[1]], {radius:5, color:data.color||'#2196F3'}).addTo(drawnItems);
+        layer = L.circleMarker([data.points[0], data.points[1]], {
+          radius: 5,
+          color: data.color || '#2196F3',
+          fillColor: data.color || '#2196F3',
+          fillOpacity: 0.9,
+          weight: data.weight || 2
+        }).addTo(drawnItems);
       }
       if(layer) firebaseIdToLayer.set(id, layer);
     }
