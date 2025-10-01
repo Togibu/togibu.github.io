@@ -49,7 +49,8 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
-import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // ===== Firebase Config =====
 const firebaseConfig = {
@@ -67,6 +68,14 @@ let analytics;
 try { analytics = getAnalytics(app); } catch(e) { /* no-op in non-https/dev */ }
 const db = getFirestore(app);
 const linesCol = collection(db, "lines");
+
+// ===== Auth (Anonymous) =====
+const auth = getAuth(app);
+let uid = null;
+signInAnonymously(auth).catch(console.error);
+onAuthStateChanged(auth, (user) => {
+  uid = user?.uid || null;
+});
 
 // ===== Leaflet Map =====
 const map = L.map('map').setView([51.505, -0.09], 13);
@@ -131,6 +140,8 @@ map.on('mouseup', async e=>{
       points: simplified,
       color: currentColor,
       weight: currentWeight,
+      ownerId: uid,
+      createdAt: serverTimestamp(),
       timestamp: Date.now()
     });
     // remove temporary preview line; onSnapshot will render the persisted one
@@ -148,6 +159,8 @@ map.on('click', async e=>{
         type:'marker',
         points:[e.latlng.lat,e.latlng.lng],
         color:currentColor,
+        ownerId: uid,
+        createdAt: serverTimestamp(),
         timestamp:Date.now()
       });
     }catch(err){console.error(err);}
@@ -158,6 +171,8 @@ map.on('click', async e=>{
         points:[e.latlng.lat,e.latlng.lng],
         color:currentColor,
         weight:currentWeight,
+        ownerId: uid,
+        createdAt: serverTimestamp(),
         timestamp:Date.now()
       });
     }catch(err){console.error(err);}
