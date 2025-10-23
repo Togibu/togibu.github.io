@@ -114,6 +114,7 @@ map.on('mousedown', e=>{
   currentPoints=[e.latlng];
   currentLine=L.polyline(currentPoints, {color:currentColor, weight:currentWeight}).addTo(drawnItems);
   map.dragging.disable();
+  document.addEventListener('mouseup', handleLineMouseUp);
 });
 
 map.on('mousemove', e=>{
@@ -125,14 +126,31 @@ map.on('mousemove', e=>{
   }
 });
 
-map.on('mouseup', async e=>{
-  if(!drawing || mode!=='line') return;
-  drawing=false;
-  map.dragging.enable();
-  if(currentPoints.length < 2) {
-    drawnItems.removeLayer(currentLine);
+map.on('mouseup', handleLineMouseUp);
+
+async function handleLineMouseUp(){
+  document.removeEventListener('mouseup', handleLineMouseUp);
+  if(!drawing){
+    map.dragging.enable();
     return;
   }
+
+  const shouldPersist = mode==='line';
+  drawing=false;
+  map.dragging.enable();
+
+  if(!currentLine){
+    currentPoints = [];
+    return;
+  }
+
+  if(!shouldPersist || currentPoints.length < 2) {
+    drawnItems.removeLayer(currentLine);
+    currentLine = null;
+    currentPoints = [];
+    return;
+  }
+
   try{
     const simplified = downsampleLatLngs(currentPoints, 3).map(p=>[p.lat, p.lng]);
     await addDoc(linesCol,{
@@ -149,7 +167,7 @@ map.on('mouseup', async e=>{
     currentLine = null;
     currentPoints = [];
   }catch(err){console.error(err);}
-});
+}
 
 // ===== Marker / Punkt setzen / Radierer =====
 map.on('click', async e=>{
