@@ -72,10 +72,31 @@ const linesCol = collection(db, "lines");
 // ===== Auth (Anonymous) =====
 const auth = getAuth(app);
 let uid = null;
-signInAnonymously(auth).catch(console.error);
+let resolveAuthReady;
+let rejectAuthReady;
+const authReady = new Promise((resolve, reject) => {
+  resolveAuthReady = resolve;
+  rejectAuthReady = reject;
+});
+
+signInAnonymously(auth).catch(err => {
+  console.error('Anonymous sign-in failed', err);
+  rejectAuthReady?.(err);
+});
+
 onAuthStateChanged(auth, (user) => {
   uid = user?.uid || null;
+  if(uid){
+    resolveAuthReady?.(uid);
+    resolveAuthReady = null;
+    rejectAuthReady = null;
+  }
 });
+
+async function ensureAuth(){
+  if(uid) return uid;
+  return authReady;
+}
 
 // ===== Leaflet Map =====
 const map = L.map('map').setView([51.505, -0.09], 13);
@@ -152,6 +173,17 @@ async function handleLineMouseUp(){
   }
 
   try{
+    if(!uid){
+      try{
+        await ensureAuth();
+      }catch(authErr){
+        console.error('Could not save line because authentication failed or is not ready.', authErr);
+        drawnItems.removeLayer(currentLine);
+        currentLine = null;
+        currentPoints = [];
+        return;
+      }
+    }
     const simplified = downsampleLatLngs(currentPoints, 3).map(p=>[p.lat, p.lng]);
     await addDoc(linesCol,{
       type:'polyline',
@@ -173,6 +205,7 @@ async function handleLineMouseUp(){
 map.on('click', async e=>{
   if(mode==='pin'){
     try{
+      await ensureAuth();
       await addDoc(linesCol,{
         type:'marker',
         points:[e.latlng.lat,e.latlng.lng],
@@ -184,6 +217,7 @@ map.on('click', async e=>{
     }catch(err){console.error(err);}
   }else if(mode==='point'){
     try{
+      await ensureAuth();
       await addDoc(linesCol,{
         type:'point',
         points:[e.latlng.lat,e.latlng.lng],
@@ -212,6 +246,7 @@ map.on('click', async e=>{
     });
     if(foundId){
       try{
+        await ensureAuth();
         await deleteDoc(doc(db, "lines", foundId));
       }catch(err){console.error(err);}
     }
@@ -254,9 +289,11 @@ function shouldAddPoint(prev, next) {
 }
 
 function downsampleLatLngs(latlngs, step = 3) {
+  if (latlngs.length <= 2) return latlngs.slice();
   const out = [];
   for (let i = 0; i < latlngs.length; i += step) out.push(latlngs[i]);
-  if (latlngs.length % step !== 0) out.push(latlngs[latlngs.length - 1]);
+  const last = latlngs[latlngs.length - 1];
+  if (out[out.length - 1] !== last) out.push(last);
   return out;
 }
 
