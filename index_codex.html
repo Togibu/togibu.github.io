@@ -6,13 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
     <style>
+        :root {
+            --bg-dark: #0f1311;
+            --panel: rgba(16, 20, 18, 0.6);
+            --panel-strong: rgba(16, 20, 18, 0.82);
+            --accent: #9bd44d;
+            --accent-2: #e3b341;
+            --text: #eef5e7;
+            --muted: rgba(238, 245, 231, 0.72);
+            --shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+        }
         html, body {
             height: 100%;
             margin: 0;
             display: flex;
             flex-direction: column;
             overflow: auto;
-            font-family: Verdana, sans-serif;
+            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+            color: var(--text);
+            background: radial-gradient(1200px 600px at 15% 20%, #1b241c, var(--bg-dark));
         }
         .background-container {
             position: fixed;
@@ -29,16 +41,18 @@
             object-fit: cover;
             opacity: 0;
             transition: opacity 1.5s ease-in-out;
+            filter: saturate(0.9) brightness(0.9);
         }
         header {
-            background-color: rgba(211, 211, 211, 0.8);
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: rgba(16, 20, 18, 0.72);
+            padding: 18px 20px;
+            box-shadow: var(--shadow);
             text-align: center;
-            font-family: Verdana, sans-serif;
-            position: relative;
+            position: sticky;
+            top: 0;
             z-index: 2;
             transition: opacity 1s ease-in-out; /* Animation für Ausblenden */
+            backdrop-filter: blur(8px);
         }
         header.hidden {
             opacity: 0;
@@ -51,105 +65,76 @@
             transform: translateY(-50%);
             height: 100px;
             border-radius: 15px;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
         }
-        .menu-toggle {
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent);
+            text-shadow: 0 0 18px rgba(155, 212, 77, 0.45);
+        }
+        .menu-icon {
             position: absolute;
             top: 50%;
-            right: 36px;
+            right: 40px;
             transform: translateY(-50%);
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 14px;
-            border-radius: 999px;
-            border: 1px solid rgba(0, 0, 0, 0.15);
-            background: rgba(255, 255, 255, 0.9);
             cursor: pointer;
             z-index: 3;
-            font-family: Verdana, sans-serif;
-            font-size: 0.95rem;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .menu-toggle:hover {
-            transform: translateY(-50%) scale(1.02);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        .menu-icon div {
+            width: 30px;
+            height: 4px;
+            background-color: var(--accent-2);
+            margin: 6px 0;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
         }
-        .menu-toggle .bar {
-            width: 26px;
-            height: 3px;
-            background-color: #1a1a1a;
-            border-radius: 4px;
-            position: relative;
-            transition: transform 0.25s ease;
-        }
-        .menu-toggle .bar::before,
-        .menu-toggle .bar::after {
-            content: "";
+        .menu {
+            display: none;
             position: absolute;
-            left: 0;
-            width: 26px;
-            height: 3px;
-            background-color: #1a1a1a;
-            border-radius: 4px;
-            transition: transform 0.25s ease, opacity 0.25s ease;
-        }
-        .menu-toggle .bar::before {
-            top: -8px;
-        }
-        .menu-toggle .bar::after {
-            top: 8px;
-        }
-        .menu-toggle.open .bar {
-            transform: rotate(45deg);
-        }
-        .menu-toggle.open .bar::before {
-            transform: translateY(8px) rotate(90deg);
-        }
-        .menu-toggle.open .bar::after {
-            opacity: 0;
-        }
-        .menu-panel {
-            position: absolute;
-            top: 70px;
-            right: 24px;
-            min-width: 220px;
-            background: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 16px 30px rgba(0, 0, 0, 0.18);
-            border-radius: 16px;
+            top: 60px;
+            right: 20px;
+            background-color: var(--panel-strong);
+            box-shadow: var(--shadow);
+            border-radius: 12px;
             z-index: 3;
-            padding: 10px;
-            opacity: 0;
-            transform: translateY(-8px);
-            pointer-events: none;
-            transition: opacity 0.2s ease, transform 0.2s ease;
+            overflow: hidden;
         }
-        .menu-panel.open {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
-        }
-        .menu-panel a {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
+        .menu a {
+            display: block;
+            padding: 10px 20px;
             text-decoration: none;
-            color: #1a1a1a;
-            font-family: Verdana, sans-serif;
-            border-radius: 10px;
-            transition: background-color 0.15s ease, transform 0.15s ease;
+            color: var(--text);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
-        .menu-panel a:hover {
-            background-color: rgba(0, 0, 0, 0.06);
-            transform: translateX(2px);
+        .menu a:last-child {
+            border-bottom: none;
+        }
+        .menu a:hover {
+            background-color: rgba(255, 255, 255, 0.08);
         }
         .content {
             margin-top: 100vh; /* Platz für den Scrollbereich */
-            padding: 20px;
+            padding: 28px 24px;
             text-align: center;
-            font-family: Verdana, sans-serif;
-            color: rgb(211, 234, 7);
-            margin-bottom: 48px; /* Mehr Abstand zu den Kacheln */
+            color: var(--text);
+            margin: 24px auto 56px;
+            max-width: 900px;
+            background: var(--panel);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+        }
+        .content h2 {
+            margin: 0 0 10px;
+            font-size: 2rem;
+            color: var(--accent);
+        }
+        .content p {
+            margin: 8px 0;
+            color: var(--muted);
         }
         .tiles-container {
             display: grid;
@@ -170,19 +155,23 @@
             }
         }
         .tile {
-            background: rgba(255,255,255,0.85);
-            border-radius: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            padding: 20px;
+            background: rgba(20, 26, 22, 0.78);
+            border-radius: 18px;
+            box-shadow: 0 10px 28px rgba(0,0,0,0.28);
+            padding: 22px;
             display: flex;
             flex-direction: column;
             align-items: flex-start;
             text-decoration: none;
-            transition: box-shadow 0.2s;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
             cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(8px);
         }
         .tile:hover {
-            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            transform: translateY(-6px);
+            box-shadow: 0 14px 36px rgba(0,0,0,0.35);
+            border-color: rgba(155, 212, 77, 0.35);
         }
         .tile-header {
             display: flex;
@@ -194,20 +183,42 @@
             font-size: 1.2em;
             font-weight: bold;
             flex: 1;
-            color: #222;
+            color: var(--text);
         }
         .tile-logo {
             width: 48px;
             height: 48px;
             border-radius: 8px;
             object-fit: cover;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
         }
         .tile-desc {
             margin-top: 12px;
-            color: #444;
+            color: var(--muted);
             font-size: 1em;
             width: 100%;
             word-break: break-word;
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.9s ease both;
+        }
+        .tile:nth-child(1) { animation-delay: 0.1s; }
+        .tile:nth-child(2) { animation-delay: 0.2s; }
+        .tile:nth-child(3) { animation-delay: 0.3s; }
+        .tile:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
 
         /* Responsive: 4 Kacheln ab 900px Breite */
@@ -244,14 +255,15 @@
         <img src="lamacraft/bg22.png" alt="Background 22">
         <img src="lamacraft/bg23.png" alt="Background 23">
     </div>
-    <header id="header">
+    <header id="header" class="fade-in">
         <img src="lamacraft/logo.jpg" alt="Logo">
         <h1>Home</h1>
-        <button class="menu-toggle" id="menuToggle" onclick="toggleMenu(event)" aria-expanded="false" aria-controls="menuPanel">
-            Menü
-            <span class="bar"></span>
-        </button>
-        <div class="menu-panel" id="menuPanel" aria-hidden="true">
+        <div class="menu-icon" onclick="toggleMenu(event)">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <div class="menu" id="menu">
             <a href="lamacraft/index.html">Go to Lamacraft</a>
             <a href="https://discord.com/invite/WbDGbAGYcH">Discord</a>
             <a href="lamacraft/mods.html">Mods</a>
@@ -261,17 +273,16 @@
     </header>
 
     <!-- Platz für zusätzlichen Text -->
-    <div class="content">
+    <div class="content fade-in">
         <h2>Willkommen auf meiner Website!</h2>
         <p>Hier findest du aktuell nur die Website für meinen Minecraft Server.</p>
         <p>In der Nächsten Zeit kommt hoffentlich aber noch mehr!</p>
         <p>Drücke einfach auf die drei Striche oben rechts und dann auf Lamacraft</p>
         <p>Besuche uns auf Discord für weitere Informationen und Updates.</p>
-        <p>https://drive.google.com/drive/folders/1UXQ0Hq_aIYliBPncGT1SMI5o94NlH6J4</p>
     </div>
 
     <div class="tiles-container">
-        <a class="tile" href="lamacraft/index.html">
+        <a class="tile fade-in" href="lamacraft/index.html">
             <div class="tile-header">
                 <span class="tile-title">Lamacraft</span>
                 <img src="lamacraft/logo.jpg" alt="Logo" class="tile-logo">
@@ -280,7 +291,7 @@
                 Minecraft-Server in der Version 1.21.8. Informationen, Downloads und Neuigkeiten rund um Lamacraft findest du hier.
             </div>
         </a>
-        <a class="tile" href="https://github.com/Togibu/car-game">
+        <a class="tile fade-in" href="https://github.com/Togibu/car-game">
             <div class="tile-header">
                 <span class="tile-title">Car Game</span>
                 <img src="logos/police.png" alt="Logo" class="tile-logo">
@@ -289,7 +300,7 @@
                 Ein kleines Rennspiel, das ich mit Justus in Unity gebaut habe. Teste es gerne aus – Namensvorschläge sind willkommen!
             </div>
         </a>
-        <a class="tile" href="https://leo.redeker.org">
+        <a class="tile fade-in" href="https://leo.redeker.org">
             <div class="tile-header">
                 <span class="tile-title">Birdwatcher</span>
                 <img src="logos/birdylogo.png" alt="Logo" class="tile-logo">
@@ -298,7 +309,7 @@
                 Ein Python-Tool, das automatisch Fotos aus dem Nistkasten macht und in der Nextcloud speichert.
             </div>
         </a>
-        <a class="tile" href="https://leo.redeker.org">
+        <a class="tile fade-in" href="https://leo.redeker.org">
             <div class="tile-header">
                 <span class="tile-title">Website</span>
                 <img src="logos/platine.png" alt="Logo" class="tile-logo">
@@ -325,24 +336,10 @@
 
         // Menü umschalten
         function toggleMenu(event) {
-            event.stopPropagation();
-            const menu = document.getElementById('menuPanel');
-            const toggle = document.getElementById('menuToggle');
-            const isOpen = menu.classList.toggle('open');
-            toggle.classList.toggle('open', isOpen);
-            toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-            menu.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+            event.stopPropagation(); // Verhindert, dass der Body-Klick ausgelöst wird
+            const menu = document.getElementById('menu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
         }
-
-        document.addEventListener('click', () => {
-            const menu = document.getElementById('menuPanel');
-            const toggle = document.getElementById('menuToggle');
-            if (!menu.classList.contains('open')) return;
-            menu.classList.remove('open');
-            toggle.classList.remove('open');
-            toggle.setAttribute('aria-expanded', 'false');
-            menu.setAttribute('aria-hidden', 'true');
-        });
     </script>
 </body>
 </html>
