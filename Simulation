@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Säuren und Basen - Interaktive Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            padding: 15px 30px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover, .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: translateY(-2px);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Raum-Exploration */
+        .room-container {
+            background: linear-gradient(180deg, #87CEEB 0%, #E0E0E0 100%);
+            border-radius: 20px;
+            padding: 20px;
+            position: relative;
+            min-height: 500px;
+        }
+
+        .room {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .room-item {
+            background: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #333;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .room-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .room-item.measured {
+            border: 3px solid #4ecdc4;
+        }
+
+        .room-item .emoji {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .room-item .name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .room-item .ph-value {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .ph-indicator {
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        /* pH-Skala */
+        .ph-scale-container {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .ph-scale {
+            display: flex;
+            height: 50px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .ph-scale div {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* Drag & Drop Sortierung */
+        .sorting-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .items-pool {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            min-height: 120px;
+        }
+
+        .items-pool h3 {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .draggable-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            min-height: 60px;
+        }
+
+        .drag-item {
+            background: rgba(255,255,255,0.2);
+            padding: 10px 18px;
+            border-radius: 25px;
+            cursor: grab;
+            transition: all 0.3s;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95em;
+        }
+
+        .drag-item:hover {
+            transform: scale(1.05);
+            background: rgba(255,255,255,0.3);
+        }
+
+        .drag-item.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .drag-item .item-emoji {
+            font-size: 1.3em;
+        }
+
+        .drag-item.known {
+            border: 2px solid #4ecdc4;
+        }
+
+        .drag-item.unknown {
+            border: 2px dashed rgba(255,255,255,0.3);
+        }
+
+        .sorting-area {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .sort-zone {
+            flex: 1;
+            min-width: 200px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            min-height: 180px;
+            transition: all 0.3s;
+        }
+
+        .sort-zone.drag-over {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        .sort-zone h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .sort-zone.acid { border-left: 5px solid #ff6b6b; }
+        .sort-zone.neutral { border-left: 5px solid #4ecdc4; }
+        .sort-zone.base { border-left: 5px solid #667eea; }
+
+        .sorted-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            min-height: 50px;
+        }
+
+        .sorted-item {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: grab;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .sorted-item.correct {
+            box-shadow: 0 0 10px rgba(0,255,0,0.5);
+            background: rgba(0,255,0,0.3);
+        }
+
+        .sorted-item.incorrect {
+            box-shadow: 0 0 10px rgba(255,0,0,0.5);
+            background: rgba(255,0,0,0.3);
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .check-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .check-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(78, 205, 196, 0.4);
+        }
+
+        .check-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .feedback-panel {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .score-display {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .score-display.perfect {
+            color: #4ecdc4;
+        }
+
+        .hint-text {
+            color: #aaa;
+            font-size: 0.9em;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        /* Labor-Simulation */
+        .lab-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .lab-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .lab-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 25px;
+        }
+
+        .lab-section h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .beaker-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            height: 300px;
+            position: relative;
+        }
+
+        .beaker {
+            width: 150px;
+            height: 200px;
+            border: 4px solid #ccc;
+            border-top: none;
+            border-radius: 0 0 20px 20px;
+            position: relative;
+            background: rgba(255,255,255,0.1);
+            overflow: hidden;
+        }
+
+        .beaker::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -15px;
+            right: -15px;
+            height: 15px;
+            background: #ccc;
+            border-radius: 5px;
+        }
+
+        .liquid {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            transition: all 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ph-display {
+            background: rgba(0,0,0,0.3);
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            color: #fff;
+        }
+
+        .btn-hcl { background: linear-gradient(135deg, #ff6b6b, #ee5a5a); }
+        .btn-naoh { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .btn-water { background: linear-gradient(135deg, #4ecdc4, #44a08d); }
+        .btn-reset { background: linear-gradient(135deg, #636e72, #2d3436); }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        /* Teilchenebene */
+        .particle-view {
+            width: 100%;
+            height: 250px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+            transition: opacity 0.3s;
+        }
+
+        .particle.hidden {
+            opacity: 0.15;
+        }
+
+        .particle.h3o {
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle at 30% 30%, #ff8a8a, #ff4444);
+        }
+
+        .particle.oh {
+            width: 28px;
+            height: 28px;
+            background: radial-gradient(circle at 30% 30%, #8a8aff, #4444ff);
+        }
+
+        .particle.h2o {
+            width: 22px;
+            height: 22px;
+            background: radial-gradient(circle at 30% 30%, #8affff, #44dddd);
+        }
+
+        .particle.cl {
+            width: 26px;
+            height: 26px;
+            background: radial-gradient(circle at 30% 30%, #90EE90, #32CD32);
+        }
+
+        .particle.na {
+            width: 26px;
+            height: 26px;
+            background: radial-gradient(circle at 30% 30%, #DDA0DD, #9932CC);
+        }
+
+        .legend {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.85em;
+        }
+
+        .legend-dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+        }
+
+        /* Optionen Panel */
+        .options-panel {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .options-panel h4 {
+            margin-bottom: 10px;
+            font-size: 0.95em;
+            color: #aaa;
+        }
+
+        .option-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+
+        .option-row label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .option-row input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .option-row input[type="range"] {
+            width: 150px;
+            cursor: pointer;
+        }
+
+        .speed-value {
+            min-width: 60px;
+            text-align: center;
+            font-size: 0.85em;
+            color: #aaa;
+        }
+
+        /* Info-Panel */
+        .info-panel {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .info-panel h3 {
+            margin-bottom: 15px;
+            color: #4ecdc4;
+        }
+
+        .reaction-equation {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 5px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #44a08d);
+            transition: width 0.5s;
+        }
+
+        .achievement {
+            display: inline-block;
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #333;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin: 5px;
+            font-size: 0.85em;
+        }
+
+        /* Tooltips */
+        .tooltip {
+            position: fixed;
+            background: rgba(0,0,0,0.9);
+            color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 300px;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+        /* Anleitung */
+        .instructions {
+            background: linear-gradient(135deg, rgba(102,126,234,0.3), rgba(118,75,162,0.3));
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .instructions h3 {
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            list-style-position: inside;
+        }
+
+        .instructions li {
+            margin: 8px 0;
+        }
+
+        .counter-badge {
+            background: rgba(78, 205, 196, 0.3);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            margin-left: 10px;
+        }
+
+        /* Hinweis-Box */
+        .hint-box {
+            background: linear-gradient(135deg, rgba(78, 205, 196, 0.2), rgba(68, 160, 141, 0.2));
+            border-left: 4px solid #4ecdc4;
+            border-radius: 0 10px 10px 0;
+            padding: 15px 20px;
+            margin: 15px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .hint-box .hint-icon {
+            font-size: 1.5em;
+            flex-shrink: 0;
+        }
+
+        .hint-box .hint-content {
+            flex: 1;
+        }
+
+        .hint-box .hint-title {
+            font-weight: bold;
+            color: #4ecdc4;
+            margin-bottom: 5px;
+        }
+
+        .hint-box .hint-text {
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧪 Säuren und Basen im Alltag</h1>
+            <p>Entdecke die Chemie um dich herum!</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="explore">🏠 Raum erkunden</button>
+            <button class="tab-btn" data-tab="sort">📊 Sortieren</button>
+            <button class="tab-btn" data-tab="experiment">🔬 Experiment</button>
+        </div>
+
+        <!-- Tab 1: Raum erkunden -->
+        <div id="explore" class="tab-content active">
+            <div class="instructions">
+                <h3>📋 Aufgabe 1: Entdecke Säuren und Basen im Alltag</h3>
+                <ul>
+                    <li>Klicke auf verschiedene Gegenstände, um ihren pH-Wert mit Universalindikator zu messen</li>
+                    <li>Beobachte die Farbänderung des Indikators</li>
+                    <li>Sammle alle pH-Werte!</li>
+                </ul>
+            </div>
+
+            <div class="room-container">
+                <div class="room" id="room"></div>
+            </div>
+
+            <div class="ph-scale-container">
+                <h3>pH-Skala mit Universalindikator-Farben</h3>
+                <div class="ph-scale" id="phScale"></div>
+                <div style="display: flex; justify-content: space-between; padding: 0 5px;">
+                    <span>← stark sauer</span>
+                    <span>neutral</span>
+                    <span>stark basisch →</span>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3>📈 Dein Fortschritt</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <p id="progressText">0 von 12 Gegenständen gemessen</p>
+                <div id="achievements"></div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Sortieren -->
+        <div id="sort" class="tab-content">
+            <div class="instructions">
+                <h3>📋 Aufgabe 2: Sortiere nach Säure und Base</h3>
+                <ul>
+                    <li>Ziehe <strong>alle 12 Stoffe</strong> in die richtige Kategorie</li>
+                    <li>Säuren haben pH &lt; 7, Basen haben pH &gt; 7, Neutral ist pH = 7</li>
+                    <li>Nutze dein Wissen aus Aufgabe 1 – oder rate!</li>
+                </ul>
+            </div>
+
+            <div class="sorting-container">
+                <div class="items-pool">
+                    <h3>
+                        🧪 Stoffe zum Sortieren
+                        <span class="counter-badge" id="poolCounter">12 übrig</span>
+                    </h3>
+                    <div class="draggable-items" id="itemsPool"></div>
+                </div>
+
+                <div class="sorting-area">
+                    <div class="sort-zone acid" id="acidZone" data-zone="acid">
+                        <h3>🔴 Säuren (pH &lt; 7) <span class="counter-badge" id="acidCounter">0</span></h3>
+                        <div class="sorted-items"></div>
+                    </div>
+                    <div class="sort-zone neutral" id="neutralZone" data-zone="neutral">
+                        <h3>🟢 Neutral (pH = 7) <span class="counter-badge" id="neutralCounter">0</span></h3>
+                        <div class="sorted-items"></div>
+                    </div>
+                    <div class="sort-zone base" id="baseZone" data-zone="base">
+                        <h3>🔵 Basen (pH &gt; 7) <span class="counter-badge" id="baseCounter">0</span></h3>
+                        <div class="sorted-items"></div>
+                    </div>
+                </div>
+
+                <button class="check-btn" id="checkBtn" onclick="checkSorting()">✓ Überprüfen</button>
+                <p class="hint-text" id="sortHint">Sortiere alle 12 Stoffe, um deine Antworten zu überprüfen.</p>
+
+                <div class="feedback-panel" id="feedbackPanel" style="display: none;">
+                    <h3>Ergebnis</h3>
+                    <div class="score-display" id="scoreDisplay"></div>
+                    <p id="feedbackText"></p>
+                    <button class="btn btn-reset" onclick="resetSorting()" style="margin-top: 15px;">
+                        🔄 Neu sortieren
+                    </button>
+                </div>
+            </div>
+
+            <div class="info-panel" style="margin-top: 20px;">
+                <h3>💡 Tipps</h3>
+                <p id="funFact">Säuren schmecken sauer (z.B. Zitrone, Essig). Basen fühlen sich seifig an und sind oft in Reinigungsmitteln enthalten.</p>
+            </div>
+        </div>
+
+        <!-- Tab 3: Experiment -->
+        <div id="experiment" class="tab-content">
+            <div class="instructions">
+                <h3>📋 Aufgabe 3: Experimentiere mit Säuren und Basen</h3>
+                <ul>
+                    <li>Das Becherglas enthält zu Beginn reines Wasser (pH 7)</li>
+                    <li>Füge Salzsäure (HCl) oder Natronlauge (NaOH) hinzu</li>
+                    <li>Beobachte die Farbänderung des Indikators und die Teilchenbewegung</li>
+                </ul>
+            </div>
+
+            <div class="hint-box">
+                <span class="hint-icon">💧</span>
+                <div class="hint-content">
+                    <div class="hint-title">Warum hat Wasser pH 7?</div>
+                    <div class="hint-text">
+                        Reines Wasser ist <strong>neutral</strong>. Es enthält gleich viele H₃O⁺-Ionen (sauer) wie OH⁻-Ionen (basisch). 
+                        Diese entstehen durch die <strong>Autoprotolyse</strong> des Wassers: 2 H₂O ⇌ H₃O⁺ + OH⁻. 
+                        Bei 25°C ist die Konzentration beider Ionen jeweils 10⁻⁷ mol/L – daher pH 7.
+                    </div>
+                </div>
+            </div>
+
+            <div class="lab-container">
+                <!-- Makroskopische Ansicht -->
+                <div class="lab-section">
+                    <h2>🧫 Makroskopische Ebene</h2>
+                    <p style="text-align: center; color: #aaa; margin-bottom: 10px;">Was wir mit den Augen sehen</p>
+                    
+                    <div class="beaker-container">
+                        <div class="beaker" id="beaker">
+                            <div class="liquid" id="liquid">
+                                <span class="ph-display" id="phDisplay">pH 7.0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="controls">
+                        <div class="control-group">
+                            <button class="btn btn-hcl" onclick="addSubstance('hcl')">+ HCl (Säure)</button>
+                            <button class="btn btn-water" onclick="addSubstance('water')">+ H₂O (Wasser)</button>
+                            <button class="btn btn-naoh" onclick="addSubstance('naoh')">+ NaOH (Base)</button>
+                        </div>
+                        <div class="control-group">
+                            <button class="btn btn-reset" onclick="resetExperiment()">🔄 Zurücksetzen</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submikroskopische Ansicht -->
+                <div class="lab-section">
+                    <h2>⚛️ Teilchenebene</h2>
+                    <p style="text-align: center; color: #aaa; margin-bottom: 10px;">Was auf molekularer Ebene passiert</p>
+                    
+                    <div class="particle-view" id="particleView"></div>
+
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background: #ff4444;"></div>
+                            <span>H₃O⁺</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background: #4444ff;"></div>
+                            <span>OH⁻</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background: #44dddd;"></div>
+                            <span>H₂O</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background: #32CD32;"></div>
+                            <span>Cl⁻</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background: #9932CC;"></div>
+                            <span>Na⁺</span>
+                        </div>
+                    </div>
+
+                    <div class="options-panel">
+                        <h4>⚙️ Anzeigeoptionen</h4>
+                        <div class="option-row">
+                            <label>
+                                <input type="checkbox" id="hideSpectatorIons" onchange="updateParticleVisibility()">
+                                Na⁺ und Cl⁻ ausblenden (Zuschauer-Ionen)
+                            </label>
+                        </div>
+                        <div class="option-row">
+                            <label for="speedSlider">Teilchengeschwindigkeit:</label>
+                            <input type="range" id="speedSlider" min="0.1" max="2" step="0.1" value="1" onchange="updateSpeed()">
+                            <span class="speed-value" id="speedValue">1.0x</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3>🔬 Aktuelle Reaktion</h3>
+                <div class="reaction-equation" id="reactionEquation">
+                    H₂O – Reines Wasser (neutral, pH 7)
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="h3oCount">0</div>
+                        <div>H₃O⁺ Ionen</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="ohCount">0</div>
+                        <div>OH⁻ Ionen</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="h2oCount">10</div>
+                        <div>H₂O Moleküle</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="currentPh">7.0</div>
+                        <div>pH-Wert</div>
+                    </div>
+                </div>
+
+                <div id="explanationText" style="margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px;">
+                    <strong>💡 Erklärung:</strong> Das Becherglas enthält reines Wasser. Die Lösung ist neutral (pH 7), da gleich viele H₃O⁺- und OH⁻-Ionen vorhanden sind. Füge Säure oder Base hinzu, um den pH-Wert zu ändern!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        // Gegenstände mit pH-Werten
+        const items = [
+            { name: 'Zitrone', emoji: '🍋', ph: 2.3, fact: 'Zitronen enthalten Zitronensäure (Citronensäure).' },
+            { name: 'Cola', emoji: '🥤', ph: 2.5, fact: 'Cola enthält Phosphorsäure und ist sehr sauer.' },
+            { name: 'Essig', emoji: '🫗', ph: 2.9, fact: 'Essig enthält Essigsäure (Ethansäure).' },
+            { name: 'Orangensaft', emoji: '🍊', ph: 3.5, fact: 'Orangensaft enthält Ascorbinsäure (Vitamin C).' },
+            { name: 'Kaffee', emoji: '☕', ph: 5.0, fact: 'Kaffee ist leicht sauer durch verschiedene organische Säuren.' },
+            { name: 'Milch', emoji: '🥛', ph: 6.5, fact: 'Milch ist fast neutral, enthält aber Milchsäure.' },
+            { name: 'Wasser', emoji: '💧', ph: 7.0, fact: 'Reines Wasser ist neutral - der Referenzpunkt der pH-Skala.' },
+            { name: 'Blut', emoji: '🩸', ph: 7.4, fact: 'Unser Blut ist leicht basisch und sehr streng reguliert.' },
+            { name: 'Backpulver', emoji: '🧁', ph: 8.5, fact: 'Backpulver (Natriumhydrogencarbonat) ist eine schwache Base.' },
+            { name: 'Seife', emoji: '🧼', ph: 10.0, fact: 'Seife ist basisch und löst daher Fette gut.' },
+            { name: 'Bleiche', emoji: '🧴', ph: 12.5, fact: 'Bleiche ist stark basisch - Vorsicht beim Umgang!' },
+            { name: 'Rohrreiniger', emoji: '🔧', ph: 14.0, fact: 'Rohrreiniger enthält starke Basen wie Natriumhydroxid.' }
+        ];
+
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        let measuredItems = new Set();
+        let sortedItems = {};
+        let particles = [];
+        let particleSpeed = 1;
+        let hideSpectatorIons = false;
+        let animationId = null;
+
+        // Experiment startet mit Wasser
+        let experimentState = {
+            ph: 7,
+            h3o: 0,
+            oh: 0,
+            h2o: 10,
+            cl: 0,
+            na: 0,
+            volume: 40
+        };
+
+        function getPhColor(ph) {
+            const colors = [
+                '#ff0000', '#ff3300', '#ff6600', '#ff9900', '#ffcc00',
+                '#ccff00', '#66ff00', '#00ff00', '#00ff66', '#00ffcc',
+                '#00ccff', '#0099ff', '#0066ff', '#3300ff', '#6600cc'
+            ];
+            const index = Math.max(0, Math.min(14, Math.round(ph)));
+            return colors[index];
+        }
+
+        function initRoom() {
+            const room = document.getElementById('room');
+            room.innerHTML = '';
+            const shuffled = shuffleArray(items);
+            
+            shuffled.forEach((item) => {
+                const originalIndex = items.findIndex(i => i.name === item.name);
+                const div = document.createElement('div');
+                div.className = 'room-item';
+                div.dataset.originalIndex = originalIndex;
+                div.innerHTML = `
+                    <div class="emoji">${item.emoji}</div>
+                    <div class="name">${item.name}</div>
+                    <div class="ph-value" id="ph-${originalIndex}">Klicke zum Messen!</div>
+                    <div class="ph-indicator" id="indicator-${originalIndex}"></div>
+                `;
+                div.onclick = (e) => measureItem(originalIndex, e);
+                room.appendChild(div);
+            });
+        }
+
+        function initPhScale() {
+            const scale = document.getElementById('phScale');
+            scale.innerHTML = '';
+            
+            for (let i = 0; i <= 14; i++) {
+                const div = document.createElement('div');
+                div.style.background = getPhColor(i);
+                div.textContent = i;
+                scale.appendChild(div);
+            }
+        }
+
+        function measureItem(index, event) {
+            const item = items[index];
+            const phValue = document.getElementById(`ph-${index}`);
+            const indicator = document.getElementById(`indicator-${index}`);
+            const roomItem = document.querySelector(`[data-original-index="${index}"]`);
+            
+            roomItem.style.transform = 'scale(1.1)';
+            setTimeout(() => roomItem.style.transform = '', 300);
+            
+            phValue.innerHTML = `pH ${item.ph}`;
+            indicator.style.background = getPhColor(item.ph);
+            roomItem.classList.add('measured');
+            
+            if (!measuredItems.has(index)) {
+                measuredItems.add(index);
+                updateProgress();
+                updateSortingDisplay();
+            }
+            
+            showTooltip(event, item.fact);
+        }
+
+        function updateProgress() {
+            const percent = (measuredItems.size / items.length) * 100;
+            document.getElementById('progressFill').style.width = `${percent}%`;
+            document.getElementById('progressText').textContent = 
+                `${measuredItems.size} von ${items.length} Gegenständen gemessen`;
+            
+            const achievements = document.getElementById('achievements');
+            achievements.innerHTML = '';
+            
+            if (measuredItems.size >= 3) {
+                achievements.innerHTML += '<span class="achievement">🔬 Erste Messungen!</span>';
+            }
+            if (measuredItems.size >= 6) {
+                achievements.innerHTML += '<span class="achievement">📊 Halbzeit!</span>';
+            }
+            if (measuredItems.size >= items.length) {
+                achievements.innerHTML += '<span class="achievement">🏆 Alle entdeckt!</span>';
+            }
+        }
+
+        function initSortingItems() {
+            const pool = document.getElementById('itemsPool');
+            pool.innerHTML = '';
+            
+            const shuffled = shuffleArray(items.map((item, i) => ({ ...item, originalIndex: i })));
+            
+            shuffled.forEach((item) => {
+                const index = item.originalIndex;
+                const isMeasured = measuredItems.has(index);
+                
+                const div = document.createElement('div');
+                div.className = `drag-item ${isMeasured ? 'known' : 'unknown'}`;
+                div.draggable = true;
+                div.dataset.index = index;
+                
+                if (isMeasured) {
+                    div.innerHTML = `
+                        <span class="item-emoji">${item.emoji}</span>
+                        <span>${item.name}</span>
+                        <span style="color: #4ecdc4; font-size: 0.85em;">(pH ${item.ph})</span>
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <span class="item-emoji">${item.emoji}</span>
+                        <span>${item.name}</span>
+                        <span style="color: #888; font-size: 0.85em;">(pH ?)</span>
+                    `;
+                }
+                
+                div.addEventListener('dragstart', handleDragStart);
+                div.addEventListener('dragend', handleDragEnd);
+                
+                pool.appendChild(div);
+            });
+            
+            updateCounters();
+        }
+
+        function updateSortingDisplay() {
+            document.querySelectorAll('#itemsPool .drag-item').forEach(div => {
+                const index = parseInt(div.dataset.index);
+                const item = items[index];
+                const isMeasured = measuredItems.has(index);
+                
+                div.className = `drag-item ${isMeasured ? 'known' : 'unknown'}`;
+                
+                if (isMeasured) {
+                    div.innerHTML = `
+                        <span class="item-emoji">${item.emoji}</span>
+                        <span>${item.name}</span>
+                        <span style="color: #4ecdc4; font-size: 0.85em;">(pH ${item.ph})</span>
+                    `;
+                }
+            });
+            
+            document.querySelectorAll('.sorted-item').forEach(div => {
+                const index = parseInt(div.dataset.index);
+                const item = items[index];
+                const isMeasured = measuredItems.has(index);
+                
+                if (isMeasured) {
+                    div.innerHTML = `${item.emoji} ${item.name} <span style="font-size:0.85em;opacity:0.8;">(pH ${item.ph})</span>`;
+                }
+            });
+        }
+
+        function updateCounters() {
+            const poolCount = document.querySelectorAll('#itemsPool .drag-item').length;
+            const acidCount = document.querySelectorAll('#acidZone .sorted-item').length;
+            const neutralCount = document.querySelectorAll('#neutralZone .sorted-item').length;
+            const baseCount = document.querySelectorAll('#baseZone .sorted-item').length;
+            
+            document.getElementById('poolCounter').textContent = `${poolCount} übrig`;
+            document.getElementById('acidCounter').textContent = acidCount;
+            document.getElementById('neutralCounter').textContent = neutralCount;
+            document.getElementById('baseCounter').textContent = baseCount;
+            
+            const allSorted = poolCount === 0;
+            const checkBtn = document.getElementById('checkBtn');
+            const sortHint = document.getElementById('sortHint');
+            
+            if (allSorted) {
+                checkBtn.disabled = false;
+                sortHint.textContent = '✓ Alle Stoffe sortiert! Klicke auf "Überprüfen".';
+                sortHint.style.color = '#4ecdc4';
+            } else {
+                checkBtn.disabled = true;
+                sortHint.textContent = `Sortiere noch ${poolCount} Stoff${poolCount !== 1 ? 'e' : ''}, um deine Antworten zu überprüfen.`;
+                sortHint.style.color = '#aaa';
+            }
+        }
+
+        let draggedItem = null;
+
+        function handleDragStart(e) {
+            draggedItem = e.target.closest('.drag-item, .sorted-item');
+            draggedItem.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            if (draggedItem) {
+                draggedItem.classList.remove('dragging');
+            }
+            draggedItem = null;
+            document.querySelectorAll('.sort-zone, .items-pool').forEach(zone => {
+                zone.classList.remove('drag-over');
+            });
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            const zone = e.target.closest('.sort-zone, .items-pool');
+            if (zone) {
+                zone.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            const zone = e.target.closest('.sort-zone, .items-pool');
+            if (zone && !zone.contains(e.relatedTarget)) {
+                zone.classList.remove('drag-over');
+            }
+        }
+
+        function handleDropInZone(e) {
+            e.preventDefault();
+            const zone = e.target.closest('.sort-zone');
+            if (!zone || !draggedItem) return;
+            
+            zone.classList.remove('drag-over');
+            
+            const index = parseInt(draggedItem.dataset.index);
+            const zoneType = zone.dataset.zone;
+            const item = items[index];
+            const isMeasured = measuredItems.has(index);
+            
+            draggedItem.remove();
+            sortedItems[index] = zoneType;
+            
+            const sortedContainer = zone.querySelector('.sorted-items');
+            const sortedDiv = document.createElement('div');
+            sortedDiv.className = 'sorted-item';
+            sortedDiv.draggable = true;
+            sortedDiv.dataset.index = index;
+            
+            if (isMeasured) {
+                sortedDiv.innerHTML = `${item.emoji} ${item.name} <span style="font-size:0.85em;opacity:0.8;">(pH ${item.ph})</span>`;
+            } else {
+                sortedDiv.innerHTML = `${item.emoji} ${item.name}`;
+            }
+            
+            sortedDiv.addEventListener('dragstart', handleDragStart);
+            sortedDiv.addEventListener('dragend', handleDragEnd);
+            
+            sortedContainer.appendChild(sortedDiv);
+            
+            updateCounters();
+            hideFeedback();
+        }
+
+        function handleDropInPool(e) {
+            e.preventDefault();
+            const pool = document.getElementById('itemsPool');
+            pool.classList.remove('drag-over');
+            
+            if (!draggedItem) return;
+            
+            const index = parseInt(draggedItem.dataset.index);
+            const item = items[index];
+            const isMeasured = measuredItems.has(index);
+            
+            draggedItem.remove();
+            delete sortedItems[index];
+            
+            const div = document.createElement('div');
+            div.className = `drag-item ${isMeasured ? 'known' : 'unknown'}`;
+            div.draggable = true;
+            div.dataset.index = index;
+            
+            if (isMeasured) {
+                div.innerHTML = `
+                    <span class="item-emoji">${item.emoji}</span>
+                    <span>${item.name}</span>
+                    <span style="color: #4ecdc4; font-size: 0.85em;">(pH ${item.ph})</span>
+                `;
+            } else {
+                div.innerHTML = `
+                    <span class="item-emoji">${item.emoji}</span>
+                    <span>${item.name}</span>
+                    <span style="color: #888; font-size: 0.85em;">(pH ?)</span>
+                `;
+            }
+            
+            div.addEventListener('dragstart', handleDragStart);
+            div.addEventListener('dragend', handleDragEnd);
+            
+            pool.appendChild(div);
+            
+            updateCounters();
+            hideFeedback();
+        }
+
+        function hideFeedback() {
+            document.getElementById('feedbackPanel').style.display = 'none';
+            document.querySelectorAll('.sorted-item').forEach(item => {
+                item.classList.remove('correct', 'incorrect');
+            });
+        }
+
+        function initSortZones() {
+            document.querySelectorAll('.sort-zone').forEach(zone => {
+                zone.addEventListener('dragover', handleDragOver);
+                zone.addEventListener('dragenter', handleDragEnter);
+                zone.addEventListener('dragleave', handleDragLeave);
+                zone.addEventListener('drop', handleDropInZone);
+            });
+            
+            const pool = document.getElementById('itemsPool');
+            pool.addEventListener('dragover', handleDragOver);
+            pool.addEventListener('dragenter', handleDragEnter);
+            pool.addEventListener('dragleave', handleDragLeave);
+            pool.addEventListener('drop', handleDropInPool);
+        }
+
+        function checkSorting() {
+            let correct = 0;
+            const total = items.length;
+            
+            items.forEach((item, index) => {
+                const element = document.querySelector(`.sorted-item[data-index="${index}"]`);
+                if (!element) return;
+                
+                const userZone = sortedItems[index];
+                
+                let correctZone;
+                if (item.ph < 7) correctZone = 'acid';
+                else if (item.ph === 7) correctZone = 'neutral';
+                else correctZone = 'base';
+                
+                if (userZone === correctZone) {
+                    correct++;
+                    element.classList.add('correct');
+                    element.classList.remove('incorrect');
+                } else {
+                    element.classList.add('incorrect');
+                    element.classList.remove('correct');
+                }
+            });
+            
+            const feedbackPanel = document.getElementById('feedbackPanel');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const feedbackText = document.getElementById('feedbackText');
+            
+            feedbackPanel.style.display = 'block';
+            scoreDisplay.textContent = `${correct} / ${total} richtig`;
+            scoreDisplay.className = 'score-display' + (correct === total ? ' perfect' : '');
+            
+            if (correct === total) {
+                feedbackText.textContent = '🎉 Perfekt! Alle Stoffe sind richtig sortiert!';
+            } else if (correct >= total * 0.8) {
+                feedbackText.textContent = '👍 Sehr gut! Nur wenige Fehler. Schau dir die rot markierten Stoffe nochmal an.';
+            } else if (correct >= total * 0.5) {
+                feedbackText.textContent = '💪 Gut gemacht! Überprüfe die rot markierten Stoffe.';
+            } else {
+                feedbackText.textContent = '📚 Weiter üben! Denke daran: pH < 7 = sauer, pH = 7 = neutral, pH > 7 = basisch.';
+            }
+        }
+
+        function resetSorting() {
+            sortedItems = {};
+            document.querySelectorAll('.sorted-items').forEach(container => {
+                container.innerHTML = '';
+            });
+            document.getElementById('feedbackPanel').style.display = 'none';
+            initSortingItems();
+        }
+
+        function addSubstance(type) {
+            const state = experimentState;
+            
+            switch(type) {
+                case 'hcl':
+                    state.h3o += 5;
+                    state.cl += 5;
+                    state.h2o += 3;
+                    while (state.h3o > 0 && state.oh > 0) {
+                        state.h3o--;
+                        state.oh--;
+                        state.h2o += 2;
+                    }
+                    state.ph = Math.max(0, state.ph - 1.5);
+                    showReaction('HCl + H₂O → H₃O⁺ + Cl⁻', 
+                        'Salzsäure gibt Protonen (H⁺) an Wasser ab. Es entstehen Oxonium-Ionen (H₃O⁺), die die Lösung sauer machen. Der pH-Wert sinkt.');
+                    break;
+                    
+                case 'naoh':
+                    state.oh += 5;
+                    state.na += 5;
+                    state.h2o += 3;
+                    while (state.h3o > 0 && state.oh > 0) {
+                        state.h3o--;
+                        state.oh--;
+                        state.h2o += 2;
+                    }
+                    state.ph = Math.min(14, state.ph + 1.5);
+                    showReaction('NaOH → Na⁺ + OH⁻', 
+                        'Natronlauge dissoziiert in Natrium-Ionen und Hydroxid-Ionen. Die OH⁻-Ionen machen die Lösung basisch. Der pH-Wert steigt.');
+                    break;
+                    
+                case 'water':
+                    state.h2o += 8;
+                    state.ph = state.ph + (7 - state.ph) * 0.3;
+                    showReaction('H₂O (Verdünnung)', 
+                        'Durch Zugabe von Wasser werden die Ionen verdünnt. Der pH-Wert nähert sich dem Neutralpunkt (pH 7).');
+                    break;
+            }
+            
+            state.volume = Math.min(90, state.volume + 8);
+            updateExperimentDisplay();
+            updateParticles();
+        }
+
+        function showReaction(equation, explanation) {
+            document.getElementById('reactionEquation').textContent = equation;
+            document.getElementById('explanationText').innerHTML = 
+                `<strong>💡 Erklärung:</strong> ${explanation}`;
+        }
+
+        function updateExperimentDisplay() {
+            const state = experimentState;
+            const liquid = document.getElementById('liquid');
+            const phDisplay = document.getElementById('phDisplay');
+            
+            liquid.style.height = `${state.volume}%`;
+            liquid.style.background = getPhColor(state.ph);
+            phDisplay.textContent = `pH ${state.ph.toFixed(1)}`;
+            
+            document.getElementById('h3oCount').textContent = state.h3o;
+            document.getElementById('ohCount').textContent = state.oh;
+            document.getElementById('h2oCount').textContent = state.h2o;
+            document.getElementById('currentPh').textContent = state.ph.toFixed(1);
+        }
+
+        function updateParticles() {
+            const view = document.getElementById('particleView');
+            view.innerHTML = '';
+            particles = [];
+            
+            const state = experimentState;
+            const viewWidth = view.offsetWidth - 30;
+            const viewHeight = view.offsetHeight - 30;
+            
+            for (let i = 0; i < Math.min(state.h3o, 15); i++) {
+                addParticle(view, 'h3o', 'H₃O⁺', viewWidth, viewHeight);
+            }
+            
+            for (let i = 0; i < Math.min(state.oh, 15); i++) {
+                addParticle(view, 'oh', 'OH⁻', viewWidth, viewHeight);
+            }
+            
+            for (let i = 0; i < Math.min(state.h2o, 15); i++) {
+                addParticle(view, 'h2o', 'H₂O', viewWidth, viewHeight);
+            }
+            
+            for (let i = 0; i < Math.min(state.cl, 10); i++) {
+                addParticle(view, 'cl', 'Cl⁻', viewWidth, viewHeight, true);
+            }
+            
+            for (let i = 0; i < Math.min(state.na, 10); i++) {
+                addParticle(view, 'na', 'Na⁺', viewWidth, viewHeight, true);
+            }
+            
+            updateParticleVisibility();
+            
+            if (animationId) cancelAnimationFrame(animationId);
+            animateParticles();
+        }
+
+        function addParticle(container, type, label, maxX, maxY, isSpectator = false) {
+            const particle = document.createElement('div');
+            particle.className = `particle ${type}`;
+            if (isSpectator) particle.dataset.spectator = 'true';
+            particle.textContent = label;
+            
+            const x = Math.random() * maxX;
+            const y = Math.random() * maxY;
+            
+            particle.style.left = `${x}px`;
+            particle.style.top = `${y}px`;
+            
+            container.appendChild(particle);
+            
+            particles.push({
+                element: particle,
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 2,
+                vy: (Math.random() - 0.5) * 2,
+                maxX: maxX,
+                maxY: maxY,
+                isSpectator: isSpectator
+            });
+        }
+
+        function updateParticleVisibility() {
+            hideSpectatorIons = document.getElementById('hideSpectatorIons').checked;
+            
+            particles.forEach(p => {
+                if (p.isSpectator) {
+                    p.element.classList.toggle('hidden', hideSpectatorIons);
+                }
+            });
+        }
+
+        function updateSpeed() {
+            particleSpeed = parseFloat(document.getElementById('speedSlider').value);
+            document.getElementById('speedValue').textContent = `${particleSpeed.toFixed(1)}x`;
+        }
+
+        function animateParticles() {
+            particles.forEach(p => {
+                p.x += p.vx * particleSpeed;
+                p.y += p.vy * particleSpeed;
+                
+                if (p.x <= 0 || p.x >= p.maxX) p.vx *= -1;
+                if (p.y <= 0 || p.y >= p.maxY) p.vy *= -1;
+                
+                p.x = Math.max(0, Math.min(p.maxX, p.x));
+                p.y = Math.max(0, Math.min(p.maxY, p.y));
+                
+                p.element.style.left = `${p.x}px`;
+                p.element.style.top = `${p.y}px`;
+            });
+            
+            animationId = requestAnimationFrame(animateParticles);
+        }
+
+        function resetExperiment() {
+            experimentState = {
+                ph: 7,
+                h3o: 0,
+                oh: 0,
+                h2o: 10,
+                cl: 0,
+                na: 0,
+                volume: 40
+            };
+            
+            document.getElementById('reactionEquation').textContent = 
+                'H₂O – Reines Wasser (neutral, pH 7)';
+            document.getElementById('explanationText').innerHTML = 
+                '<strong>💡 Erklärung:</strong> Das Becherglas enthält reines Wasser. Die Lösung ist neutral (pH 7), da gleich viele H₃O⁺- und OH⁻-Ionen vorhanden sind. Füge Säure oder Base hinzu, um den pH-Wert zu ändern!';
+            
+            updateExperimentDisplay();
+            updateParticles();
+        }
+
+        function showTooltip(event, text) {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.textContent = text;
+            tooltip.style.left = `${event.pageX + 15}px`;
+            tooltip.style.top = `${event.pageY + 15}px`;
+            tooltip.classList.add('show');
+            
+            setTimeout(() => tooltip.classList.remove('show'), 3000);
+        }
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+                
+                if (btn.dataset.tab === 'sort') {
+                    updateSortingDisplay();
+                }
+                
+                if (btn.dataset.tab === 'experiment') {
+                    setTimeout(() => {
+                        updateParticles();
+                    }, 100);
+                }
+            });
+        });
+
+        window.onload = () => {
+            initRoom();
+            initPhScale();
+            initSortZones();
+            initSortingItems();
+            updateExperimentDisplay();
+            updateParticles();
+        };
+
+        window.onresize = () => {
+            if (document.getElementById('experiment').classList.contains('active')) {
+                updateParticles();
+            }
+        };
+    </script>
+</body>
+</html>
